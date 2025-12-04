@@ -10,9 +10,10 @@ import Enums.WeaponType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Inventory {
-
+    Random rand = new Random();
     private final int maxWeight = 50;
     private final int maxStack = 32;
     private int coins;
