@@ -1,6 +1,12 @@
 package Inventory;
 
-import Item.Item;
+import Enums.Rarity;
+import Enums.WeaponHandleType;
+import Exceptions.NotEnoughInventorySpaceException;
+import Exceptions.TooMuchWeightException;
+import Items.Item;
+import Items.Weapon;
+import Enums.WeaponType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,9 +28,7 @@ public class Inventory {
     }
 
     public void showInventory() {
-
     }
-
     public double getTotalWeight() {
         double sum = 0;
         for (Item item : Slots) {
@@ -56,13 +60,34 @@ public class Inventory {
     }
 
     public boolean addItemCheck(Item item) {
-        if (Slots.size() >= unlockedSlots) {
+            if(Slots.size() >=unlockedSlots){
             return false;
-        }
+
+    }
         if(getTotalWeight() + item.getWeight() > maxWeight) {
             return false;
         }
         Slots.add(item);
         return true;
+    }
+
+    public void generateItem() {
+        ArrayList<Weapon>  weapons = new ArrayList<>();
+        int times = rand.nextInt(5);
+        int choice =  rand.nextInt(3);
+
+        for (int i = 0; i < times; i++) {
+
+            switch (choice) {
+                case 1:
+                case 2:
+                        
+
+
+            }
+
+
+        }
+
     }
 }

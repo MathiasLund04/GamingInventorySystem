@@ -1,4 +1,4 @@
-package Item;
+package Items;
 
 public class Consumable extends Item {
     private String description;

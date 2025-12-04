@@ -7,6 +7,8 @@ public class Adventurer {
 
     public void goOnAdventure(){
 
+
+
     }
 
 
