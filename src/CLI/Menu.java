@@ -15,7 +15,6 @@ public class Menu {
             showMenu();
             choice = getChoice(scanner);
 
-
             switch (choice) {
                 case 1 -> Adventurer.goOnAdventure();
                     break;
