@@ -78,7 +78,6 @@ public class Inventory {
         int choice =  rand.nextInt(3);
 
         for (int i = 0; i < times; i++) {
-
             switch (choice) {
                 case 1:
                 case 2:
