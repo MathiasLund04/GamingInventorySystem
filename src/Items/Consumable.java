@@ -8,8 +8,8 @@ public class Consumable extends Item {
 
 
 
-    public Consumable(String name, String type, String rarity, double weight, int value, String description, ConsumableType consumableType) {
-        super(name, type, rarity, weight, value);
+    public Consumable(String name, double weight, int value, String description, ConsumableType consumableType) {
+        super(name, weight, value);
         this.description = description;
         this.consumableType = consumableType;
     }

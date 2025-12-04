@@ -1,12 +1,6 @@
 package Inventory;
 
-import Enums.Rarity;
-import Enums.WeaponHandleType;
-import Exceptions.NotEnoughInventorySpaceException;
-import Exceptions.TooMuchWeightException;
 import Items.Item;
-import Items.Weapon;
-import Enums.WeaponType;
 
 import java.util.ArrayList;
 import java.util.List;
