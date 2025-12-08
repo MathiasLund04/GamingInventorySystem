@@ -14,5 +14,9 @@ public class Consumable extends Item {
         this.consumableType = consumableType;
     }
 
+    public String getDescription() {
+        return description;
+    }
+
 
 }

@@ -1,14 +1,20 @@
 package CLI;
 
 import Adventurer.Adventurer;
+import Logic.DBConnection;
+import Logic.DBRepo;
+import Logic.Inventory.Inventory;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
         static Scanner scanner = new Scanner(System.in);
-    public static void Menu(String[] args) {
+    public static void Menu() throws Exception {
         int choice;
+        DBConnection db = new DBConnection();
+        DBRepo dbRepo = new DBRepo(db);
+        Inventory inv = new Inventory(0,16,192,32,50,32, 0);
 
 
         do {
@@ -16,14 +22,13 @@ public class Menu {
             choice = getChoice(scanner);
 
             switch (choice) {
-                case 1 -> Adventurer.goOnAdventure();
-                    break;
-                case 2 ->
-                    break;
-                case 3 ->
-                    break;
-                case 4 -> System.out.println("Thank you for playing!");
+                case 1 -> dbRepo.insert();
+                case 2 -> inv.showInventory();
+                case 3 -> dbRepo.testConnection();
+                case 4 -> {
+                    System.out.println("Thank you for playing!");
                         System.exit(0);
+                }
                 default -> System.out.println("Invalid choice.");
 
             }

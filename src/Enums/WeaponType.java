@@ -5,7 +5,7 @@ public enum WeaponType {
     SWORD("Sword"),
     LONGSWORD("Long Sword"),
     AXE("Axe"),
-    HAMMER("Hammer"),
+    WARHAMMER("Warhammer"),
     BOW("Bow");
 
     private final String description;

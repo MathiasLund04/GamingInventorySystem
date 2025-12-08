@@ -29,6 +29,9 @@ public class Weapon extends Item {
     public WeaponType getType() {
         return type;
     }
+    public Rarity getRarity(){
+        return rarity;
+    }
 
 
 
