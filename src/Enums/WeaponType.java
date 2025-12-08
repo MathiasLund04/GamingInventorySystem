@@ -6,8 +6,8 @@ public enum WeaponType {
     LONGSWORD("Long Sword"),
     AXE("Axe"),
     WARHAMMER("Warhammer"),
-    BOW("Bow");
-
+    BOW("Bow"),
+    SHIELD("Shield");
     private final String description;
     //Give konstanterne deres beskrivelse
     WeaponType(String description) {

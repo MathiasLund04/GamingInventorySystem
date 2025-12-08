@@ -4,6 +4,7 @@ import Items.Armor;
 import Items.Consumable;
 import Items.Item;
 import Items.Weapon;
+import Logic.DBRepo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ public class Inventory {
     private final int maxSlots = 192;
     private int unlockedSlots = 32;
     private int totalWeight;
+    private DBRepo dbRepo;
 
     private final List<Item> slots = new ArrayList<>();
 
@@ -26,7 +28,7 @@ public class Inventory {
         this.coins = coins;
     }
 
-    public void showInventory() {
+    public void showInventory() throws Exception {
         System.out.println("------Inventory------");
         System.out.println("Coins: " + coins + "\nTotal Weight: " + totalWeight + "\nUnlocked Slots: " + unlockedSlots + "\n");
 

@@ -8,11 +8,13 @@ import Enums.ConsumableType;
 import Exceptions.NotEnoughInventorySpaceException;
 import Exceptions.TooMuchWeightException;
 import Items.Armor;
+import Items.Item;
 import Items.Weapon;
 import Items.Consumable;
 import Logic.Inventory.Inventory;
 
 import java.sql.*;
+import java.util.List;
 
 public class DBRepo {
     private final DBConnection db;
@@ -34,7 +36,6 @@ public class DBRepo {
         }
     }
 
-    
     //Metode til at hente inventory fra DB
     public Inventory loadInventory() throws Exception {
         Inventory inventory = null;
@@ -72,6 +73,8 @@ public class DBRepo {
                             rs.getInt("damage"),
                             WeaponHandleType.valueOf(rs.getString("handleType"))
                             );
+                    
+
                     w.setDbId(rs.getInt("hw_id")); //Dette bruges til at kunne blande items så det ikke kun er sat efter Weapon, Armor og Consumable
                     inventory.addItemCheck(w);
                 }
@@ -125,7 +128,7 @@ public class DBRepo {
         return inventory;
     }
 
-    public int generateItem() throws Exception {
+    public void generateItem() throws Exception {
         try(Connection c = db.get()) {
             int times = rand;
             int id = 0;
@@ -140,24 +143,25 @@ public class DBRepo {
                         while(rs.next()){
                         int weaponID = rs.getInt("weaponID");
                         String name =rs.getString("name");
-                        String weapontype = rs.getString("weapontype");
                         String rarity = rs.getString("rarity");
                         double weight = rs.getDouble("weight");
                         int valuee = rs.getInt("valuee");
                         int damage = rs.getInt("damage");
-                        System.out.printf("%s | %s | %s | %.1f | %d | %d%n ", name , weapontype, rarity, weight, valuee, damage);
+                        System.out.printf("%s | %s | %.1f | %d | %d%n ", name, rarity, weight, valuee, damage);
                         id = weaponID;
                         }
                         try{
-                            insert();
-                        } catch (NotEnoughInventorySpaceException){
-
-                        } catch (TooMuchWeightException){
-                            
+                            insertWeapon(1, id);
+                        } catch (NotEnoughInventorySpaceException e){
+                            System.out.println("Error: " + e.getMessage());
+                        } catch (TooMuchWeightException e){
+                            System.out.println(e.getMessage());
+                        } catch (SQLException e){
+                            System.out.println(e.getMessage());
                         }
 
-
                     break;
+
                     case 2:
                         String sql4 = "Select * from armor ORDER BY Rand() Limit 1\n";
                         PreparedStatement ps4 = c.prepareStatement(sql4);
@@ -190,23 +194,26 @@ public class DBRepo {
                         break;
                 }
             }
-        return id;
         }
     }
-
-    public void insert() throws Exception {
+    public int insertWeapon(int invId, int weaponId) throws Exception {
+            String sqlw = "INSERT INTO hasWeapon(inventoryId, weaponId) VALUES (?,?)";
         try(Connection c = db.get()) {
-            String sql = "INSERT INTO inventory(inventoryId) VALUES (?)";
-            PreparedStatement ps = c.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, generateItem());
+            PreparedStatement ps = c.prepareStatement(sqlw, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, invId);
+            ps.setInt(2, weaponId);
             ps.executeUpdate();
             System.out.println("Item added");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     int newId = keys.getInt(1);
                     System.out.println("Indsat id = " + newId);
+                    return newId;
                 }
+            } catch (SQLException e) {
+                System.out.println("Error: " + e.getMessage());
             }
         }
+        return -1;
     }
 }

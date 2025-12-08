@@ -18,12 +18,15 @@ public class Menu {
 
 
         do {
+            dbRepo.loadInventory();
             showMenu();
             choice = getChoice(scanner);
 
             switch (choice) {
-                case 1 -> dbRepo.insert();
-                case 2 -> inv.showInventory();
+                case 1 -> dbRepo.generateItem();
+                case 2 -> {
+                    inv.showInventory();
+                }
                 case 3 -> dbRepo.testConnection();
                 case 4 -> {
                     System.out.println("Thank you for playing!");
@@ -41,7 +44,7 @@ public class Menu {
         System.out.println("Legend of CodeCraft");
         System.out.println("1. Go on an adventure");
         System.out.println("2. Look at your inventory");
-        System.out.println("3. Buy more inventory space");
+        System.out.println("3. Test Connection");
         System.out.println("4. Close the game");
 
     }

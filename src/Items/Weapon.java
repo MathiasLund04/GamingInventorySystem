@@ -5,7 +5,7 @@ import Enums.WeaponHandleType;
 import Enums.WeaponType;
 
 public class Weapon extends Item {
-    private final int damage;
+    private int damage;
     WeaponType type;
     WeaponHandleType handleType;
     Rarity rarity;
@@ -31,6 +31,9 @@ public class Weapon extends Item {
     }
     public Rarity getRarity(){
         return rarity;
+    }
+    public void setDamage(int damage) {
+        this.damage = damage;
     }
 
 
