@@ -137,7 +137,7 @@ public class DBRepo {
         try(Connection c = db.get()) {
             int times = rand;
             for (int i = 0; i < times; i++) {
-                int choice = 1;
+                int choice = 2;
                 switch (choice) {
                     case 1:
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";
@@ -243,7 +243,6 @@ public class DBRepo {
         }
         return -1;
     }
-
     public int insertConsumable(int invId, int consumableId) throws Exception {
         String sqlc = "INSERT INTO hasConsumable(inventoryId, consumableId) VALUES (?,?)";
         try(Connection c = db.get()) {
@@ -263,7 +262,6 @@ public class DBRepo {
         }
         return -1;
     }
-
     public int insertArmor(int invId, int armorId) throws Exception {
         String sqla = "INSERT INTO hasArmor(inventoryId, armorId) VALUES (?,?)";
         try(Connection c = db.get()) {

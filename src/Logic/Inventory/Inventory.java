@@ -82,7 +82,24 @@ public class Inventory {
     }
     public String addItem(Item item) {
        String msg = " ";
-        if(addItemCheck(item)){
+
+       //Hvis det er en Consumable så vil den kunne stacke med dette
+       if (item instanceof Consumable) {
+           Consumable newConsumable = (Consumable) item;
+
+           for (Item i : slots){
+               if (i instanceof Consumable){
+                   Consumable existingConsumable = (Consumable) i;
+
+                   if (existingConsumable.getName().equals(newConsumable.getName())){
+                       existingConsumable.consumableCount++;
+                       msg = existingConsumable.getName() + " stacked to " + existingConsumable.getConsumableCount();
+                       return msg;
+                   }
+               }
+           }
+       }
+       if(addItemCheck(item)){
         slots.add(item);
         setTotalWeight((int) calculateTotalWeight());
         msg = item + " added to inventory ";
@@ -93,21 +110,17 @@ public class Inventory {
        return msg;
     }
 
-    public void deleteItem(Item item){
-
-    }
-
     public String showInventory(){
-        System.out.println("------Inventory------");
+        System.out.println("\n------Inventory------");
         System.out.println("Coins: " + coins + "\nTotal Weight: " + totalWeight + "\nUnlocked Slots: " + unlockedSlots + "\n");
 
         for (Item item : slots){
             if (item instanceof Weapon w){
-                System.out.printf("%s | %s | %s | %.1f | %d | %d%n", w.getName() , w.getType(), w.getRarity(), w.getWeight(), w.getValue(), w.getDamage());
+                System.out.printf(" %d | %s | %s | %s | %.1f | %d | %d%n",w.getDbId(), w.getName() , w.getType(), w.getRarity(), w.getWeight(), w.getValue(), w.getDamage());
             } else if (item instanceof Armor a){
-                System.out.printf("%s | %s | %.1f | %d | %d%n", a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
+                System.out.printf(" %d | %s | %s | %.1f | %d | %d%n",a.getDbId(), a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
             } else if (item instanceof Consumable c){
-                System.out.printf("%s | %.1f | %d | %s%n", c.getName(), c.getWeight(), c.getValue(), c.getDescription());
+                System.out.printf("%d | %s | %.1f | %d | %s%n",c.getDbId(), c.getName(), c.getWeight(), c.getValue(), c.getDescription());
             }
         }
         if (slots.isEmpty()){

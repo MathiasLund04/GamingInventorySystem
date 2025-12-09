@@ -1,12 +1,15 @@
 package CLI;
 
 import Adventurer.Adventurer;
+import Items.Item;
 import Logic.GameLogic;
 import Logic.DBConnection;
 import Logic.DBRepo;
 import Logic.Inventory.Inventory;
 
+import java.util.ArrayList;
 import java.util.InputMismatchException;
+import java.util.List;
 import java.util.Scanner;
 
 public class Menu {
@@ -53,7 +56,6 @@ public class Menu {
         System.out.println("2. Look at your inventory");
         System.out.println("3. Test Connection");
         System.out.println("4. Close the game");
-
     }
 
     public static int getChoice (Scanner scanner) {

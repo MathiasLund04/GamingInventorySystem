@@ -5,11 +5,13 @@ import Enums.ConsumableType;
 public class Consumable extends Item {
     private String description;
     ConsumableType consumableType;
+    public int consumableCount;
 
     public Consumable(String name, double weight, int value, String description, ConsumableType consumableType) {
         super(name, weight, value);
         this.description = description;
         this.consumableType = consumableType;
+        this.consumableCount = 0;
     }
 
     public String getDescription() {
@@ -17,6 +19,9 @@ public class Consumable extends Item {
     }
     public String getConsumableType() {
         return consumableType.toString();
+    }
+    public int getConsumableCount() {
+        return consumableCount;
     }
 
     public void setConsumableType(ConsumableType consumableType) {
