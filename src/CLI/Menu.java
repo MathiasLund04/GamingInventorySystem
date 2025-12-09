@@ -1,6 +1,7 @@
 package CLI;
 
 import Adventurer.Adventurer;
+import Logic.GameLogic;
 import Logic.DBConnection;
 import Logic.DBRepo;
 import Logic.Inventory.Inventory;
@@ -14,18 +15,24 @@ public class Menu {
         int choice;
         DBConnection db = new DBConnection();
         DBRepo dbRepo = new DBRepo(db);
-        Inventory inv = new Inventory(0,16,192,32,50,32, 0);
-
+        Inventory inv = new Inventory(0,5,192,32,50,20,0);
+        Adventurer adventurer = new Adventurer();
 
         do {
-            dbRepo.loadInventory();
+            inv = dbRepo.loadInventory(inv);
             showMenu();
             choice = getChoice(scanner);
 
             switch (choice) {
-                case 1 -> dbRepo.generateItem();
+                case 1 -> System.out.println(adventurer.goOnAdventure());
                 case 2 -> {
-                    inv.showInventory();
+                 if(inv !=null ){
+                     dbRepo.loadInventory(inv);
+                     inv.showInventory();
+                 } else {
+                     System.out.println("no inventory loaded");
+                 }
+
                 }
                 case 3 -> dbRepo.testConnection();
                 case 4 -> {

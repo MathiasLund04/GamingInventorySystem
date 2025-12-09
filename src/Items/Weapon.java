@@ -21,19 +21,33 @@ public class Weapon extends Item {
     public int getDamage() {
         return damage;
     }
-
     public WeaponHandleType getHandleType() {
         return handleType;
     }
-
     public WeaponType getType() {
         return type;
     }
     public Rarity getRarity(){
         return rarity;
     }
+
     public void setDamage(int damage) {
         this.damage = damage;
+    }
+    public void setHandleType(WeaponHandleType  handleType) {
+        this.handleType = handleType;
+    }
+    public void setRarity(Rarity rarity) {
+        this.rarity = rarity;
+    }
+    public void setType(WeaponType  type) {
+        this.type = type;
+    }
+
+    @Override
+    public String toString() {
+        return "Name     |  Weight  |   Value    |  Damage   |   Rarity      |   Weapon Type  \n" +
+                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDamage() + " | " + getRarity() + " | " + getType() + "\n";
     }
 
 

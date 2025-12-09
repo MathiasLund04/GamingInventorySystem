@@ -13,6 +13,7 @@ import Items.Weapon;
 import Items.Consumable;
 import Logic.Inventory.Inventory;
 
+
 import java.sql.*;
 import java.util.List;
 
@@ -37,8 +38,8 @@ public class DBRepo {
     }
 
     //Metode til at hente inventory fra DB
-    public Inventory loadInventory() throws Exception {
-        Inventory inventory = null;
+    public Inventory loadInventory(Inventory inventory) throws Exception {
+
 
         try (Connection conn = db.get()){
             //Inventory (antal coins, slots og hvor meget det hele vejer)
@@ -51,10 +52,14 @@ public class DBRepo {
                     int totalWeight = rs.getInt("totalWeight");
                     int unlockedSlots = rs.getInt("unlockedSlots");
 
-                    inventory = new Inventory(coins, 16, 192, unlockedSlots, 50, 32, totalWeight);
-                    //Inventory data er gemt i DB men den laver en ny for at kunne vise det til spilleren
+                    //Opdatere inventory
+                    inventory.setCoins(coins);
+                    inventory.setUnlockedSlots(unlockedSlots);
+                    inventory.setTotalWeight(totalWeight);
                 }
             }
+
+            inventory.clearItems();
 
             //Weapons (Ændrer String-navnet for at vise hvilken query der hører til hvilket item)
             String sqlWeapons = "SELECT w.name, w.weaponType, w.rarity, w.weight, w.valuee, w.damage, w.handleType, hw.id AS hw_id " +
@@ -73,10 +78,10 @@ public class DBRepo {
                             rs.getInt("damage"),
                             WeaponHandleType.valueOf(rs.getString("handleType"))
                             );
-                    
+
 
                     w.setDbId(rs.getInt("hw_id")); //Dette bruges til at kunne blande items så det ikke kun er sat efter Weapon, Armor og Consumable
-                    inventory.addItemCheck(w);
+                    inventory.addItem(w);
                 }
             }
 
@@ -97,7 +102,7 @@ public class DBRepo {
                             ArmorPlacement.valueOf(rs.getString("armorPlacement"))
                     );
                     a.setDbId(rs.getInt("ha_id"));
-                    inventory.addItemCheck(a);
+                    inventory.addItem(a);
                 }
             }
 
@@ -117,7 +122,7 @@ public class DBRepo {
                             ConsumableType.valueOf(rs.getString("consumableType"))
                     );
                     c.setDbId(rs.getInt("hc_id"));
-                    inventory.addItemCheck(c);
+                    inventory.addItem(c);
                 }
 
 
@@ -128,10 +133,9 @@ public class DBRepo {
         return inventory;
     }
 
-    public void generateItem() throws Exception {
+    public  Item generateItem() throws Exception {
         try(Connection c = db.get()) {
             int times = rand;
-            int id = 0;
             for (int i = 0; i < times; i++) {
                 int choice = 1;
                 switch (choice) {
@@ -139,19 +143,17 @@ public class DBRepo {
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";
                         PreparedStatement ps = c.prepareStatement(sql);
                         ResultSet rs = ps.executeQuery();
-                        System.out.println("name | weaponType | rarity | weight | value | dmg");
                         while(rs.next()){
                         int weaponID = rs.getInt("weaponID");
                         String name =rs.getString("name");
-                        String rarity = rs.getString("rarity");
+                        WeaponType weaponType = WeaponType.valueOf(rs.getString("weaponType"));
+                        Rarity rarity = Rarity.valueOf(rs.getString("rarity"));
                         double weight = rs.getDouble("weight");
                         int valuee = rs.getInt("valuee");
                         int damage = rs.getInt("damage");
-                        System.out.printf("%s | %s | %.1f | %d | %d%n ", name, rarity, weight, valuee, damage);
-                        id = weaponID;
-                        }
-                        try{
-                            insertWeapon(1, id);
+                        WeaponHandleType handleType = WeaponHandleType.valueOf(rs.getString("handletype"));
+                            try{
+                            insertWeapon(1, weaponID);
                         } catch (NotEnoughInventorySpaceException e){
                             System.out.println("Error: " + e.getMessage());
                         } catch (TooMuchWeightException e){
@@ -159,7 +161,8 @@ public class DBRepo {
                         } catch (SQLException e){
                             System.out.println(e.getMessage());
                         }
-
+                        return new Weapon(name, weaponType, rarity, weight, valuee, damage, handleType);
+                        }
                     break;
 
                     case 2:
@@ -170,12 +173,24 @@ public class DBRepo {
                         while (rs1.next()) {
                             int armorID = rs1.getInt("armorID");
                             String name = rs1.getString("name");
-                            String rarity = rs1.getString("rarity");
+                            Rarity rarity = Rarity.valueOf(rs1.getString("rarity"));
                             double weight = rs1.getDouble("weight");
                             int valuee = rs1.getInt("valuee");
                             int durability =  rs1.getInt("durability");
+                            ArmorPlacement armorPlacement = ArmorPlacement.valueOf(rs1.getString("armorPlacement"));
                             System.out.printf("%s | %s | %.1f | %d | %d%n", name, rarity, weight, valuee, durability);
-                        id = armorID;
+
+                            try{
+                                insertArmor(1, armorID);
+                            } catch (NotEnoughInventorySpaceException e){
+                                System.out.println("Error: " + e.getMessage());
+                            } catch (TooMuchWeightException e){
+                                System.out.println(e.getMessage());
+                            } catch (SQLException e){
+                                System.out.println(e.getMessage());
+                            }
+
+                        return new Armor(name, rarity, weight, valuee, durability, armorPlacement);
                         }
                         break;
                     case 3:
@@ -188,13 +203,25 @@ public class DBRepo {
                             double weight = rs2.getDouble("weight");
                             int valuee = rs2.getInt("valuee");
                             String description = rs2.getString("description");
+                            ConsumableType consumableType = ConsumableType.valueOf(rs2.getString("consumableType"));
                             System.out.printf("%s | %.1f | %d | %s", name, weight, valuee, description);
-                            id = consumableID;
+
+                            try {
+                                insertConsumable(1, consumableID);
+                            } catch (NotEnoughInventorySpaceException e){
+                                System.out.println("Error: " + e.getMessage());
+                            } catch (TooMuchWeightException e){
+                                System.out.println(e.getMessage());
+                            } catch (SQLException e){
+                                System.out.println(e.getMessage());
+                            }
+                            return new Consumable(name, weight, valuee, description, consumableType);
                         }
                         break;
                 }
             }
         }
+        return null;
     }
     public int insertWeapon(int invId, int weaponId) throws Exception {
             String sqlw = "INSERT INTO hasWeapon(inventoryId, weaponId) VALUES (?,?)";
@@ -212,6 +239,45 @@ public class DBRepo {
                 }
             } catch (SQLException e) {
                 System.out.println("Error: " + e.getMessage());
+            }
+        }
+        return -1;
+    }
+
+    public int insertConsumable(int invId, int consumableId) throws Exception {
+        String sqlc = "INSERT INTO hasConsumable(inventoryId, consumableId) VALUES (?,?)";
+        try(Connection c = db.get()) {
+            PreparedStatement ps = c.prepareStatement(sqlc, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, invId);
+            ps.setInt(2, consumableId);
+            ps.executeUpdate();
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    int newId = keys.getInt(1);
+                    return newId;
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return -1;
+    }
+
+    public int insertArmor(int invId, int armorId) throws Exception {
+        String sqla = "INSERT INTO hasArmor(inventoryId, armorId) VALUES (?,?)";
+        try(Connection c = db.get()) {
+            PreparedStatement ps = c.prepareStatement(sqla, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, invId);
+            ps.setInt(1,armorId);
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                if (keys.next()) {
+                    int newId = keys.getInt(1);
+                    return newId;
+                }
+            } catch (SQLException e){
+                e.printStackTrace();
             }
         }
         return -1;

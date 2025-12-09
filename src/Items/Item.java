@@ -22,4 +22,9 @@ public abstract class Item {
     public void setName(String name) {this.name = name;}
     public void setWeight(double weight) {this.weight = weight;}
     public void setValue(int value) {this.value = value;}
+
+    public String toString() {
+        return "Name     |  Weight  |   Value   \n" +
+                getName() + " | " + getWeight() + " | " + getValue() + "\n";
+    }
 }

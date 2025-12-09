@@ -18,34 +18,24 @@ public class Inventory {
     private final int maxPotionStack = 16;
     private final int maxSlots = 192;
     private int unlockedSlots = 32;
-    private int totalWeight;
+    private double totalWeight;
     private DBRepo dbRepo;
 
-    private final List<Item> slots = new ArrayList<>();
+    private final List<Item> slots;
 
 
-    public Inventory(int coins, int maxPotionStack, int maxSlots, int unlockedSlots, int maxWeight, int maxStack, int totalWeight) {
+    public Inventory(int coins, int maxPotionStack, int maxSlots, int unlockedSlots, int maxWeight, int maxStack, double totalWeight) {
         this.coins = coins;
+        this.unlockedSlots = unlockedSlots;
+        this.totalWeight = totalWeight;
+        this.slots = new ArrayList<>();
     }
 
-    public void showInventory() throws Exception {
-        System.out.println("------Inventory------");
-        System.out.println("Coins: " + coins + "\nTotal Weight: " + totalWeight + "\nUnlocked Slots: " + unlockedSlots + "\n");
-
-        for (Item item : slots) {
-            if (item instanceof Weapon w){
-                System.out.println("Name     | WeaponType | Rarity | Weight | Value | Damage");
-                System.out.printf("%s | %s | %s | %.1f | %d | %d%n ", w.getName() , w.getType(), w.getRarity(), w.getWeight(), w.getValue(), w.getDamage());
-            } else if (item instanceof Armor a){
-                System.out.println("Name    | Rarity | Weight | Value | Durability");
-                System.out.printf("%s | %s | %.1f | %d | %d%n ", a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
-            } else if (item instanceof Consumable c){
-                System.out.println("Name    | Weight | Value | Description");
-                System.out.printf("%s | %.1f | %d | %s%n ", c.getName(), c.getWeight(), c.getValue(), c.getDescription());
-            }
-        }
+    public double getTotalWeight(){
+        return totalWeight;
     }
-    public double getTotalWeight() {
+
+    public double calculateTotalWeight() {
         double sum = 0;
         for (Item item : slots) {
             sum += item.getWeight();
@@ -67,6 +57,9 @@ public class Inventory {
     public int getUnlockedSlots() {
         return unlockedSlots;
     }
+    public List<Item> getSlots() {
+        return slots;
+    }
 
     public void setCoins (int coins) {
         this.coins = coins;
@@ -74,18 +67,61 @@ public class Inventory {
     public void setUnlockedSlots(int unlockedSlots) {
         this.unlockedSlots = unlockedSlots;
     }
+    public void setTotalWeight(int totalWeight) {
+        this.totalWeight = totalWeight;
+    }
 
     public boolean addItemCheck(Item item) {
-            if(slots.size() >=unlockedSlots){
+            if(slots.size() >= unlockedSlots){
             return false;
-
     }
         if(getTotalWeight() + item.getWeight() > maxWeight) {
             return false;
         }
-        slots.add(item);
         return true;
     }
+    public String addItem(Item item) {
+       String msg = " ";
+        if(addItemCheck(item)){
+        slots.add(item);
+        setTotalWeight((int) calculateTotalWeight());
+        msg = item + " added to inventory ";
+       }
+       else {
+           msg = " not enough room or carry capacity to add item ";
+       }
+       return msg;
+    }
+
+    public void deleteItem(Item item){
+
+    }
+
+    public String showInventory(){
+        System.out.println("------Inventory------");
+        System.out.println("Coins: " + coins + "\nTotal Weight: " + totalWeight + "\nUnlocked Slots: " + unlockedSlots + "\n");
+
+        for (Item item : slots){
+            if (item instanceof Weapon w){
+                System.out.printf("%s | %s | %s | %.1f | %d | %d%n", w.getName() , w.getType(), w.getRarity(), w.getWeight(), w.getValue(), w.getDamage());
+            } else if (item instanceof Armor a){
+                System.out.printf("%s | %s | %.1f | %d | %d%n", a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
+            } else if (item instanceof Consumable c){
+                System.out.printf("%s | %.1f | %d | %s%n", c.getName(), c.getWeight(), c.getValue(), c.getDescription());
+            }
+        }
+        if (slots.isEmpty()){
+            return "Inventory is empty";
+        }
+        return slots.toString();
+    }
+
+    //Bruges til når der hentes fra DB så ikke der er gentagelser
+    public void clearItems(){
+        slots.clear();
+    }
+
+
 
 
 }
