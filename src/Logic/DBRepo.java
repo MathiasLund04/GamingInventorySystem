@@ -134,14 +134,14 @@ public class DBRepo {
     }
 
     public  Item generateItem() throws Exception {
-        try(Connection c = db.get()) {
+        try(Connection con = db.get()) {
             int times = rand;
             for (int i = 0; i < times; i++) {
                 int choice = 2;
                 switch (choice) {
                     case 1:
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";
-                        PreparedStatement ps = c.prepareStatement(sql);
+                        PreparedStatement ps = con.prepareStatement(sql);
                         ResultSet rs = ps.executeQuery();
                         while(rs.next()){
                         int weaponID = rs.getInt("weaponID");
@@ -152,8 +152,10 @@ public class DBRepo {
                         int valuee = rs.getInt("valuee");
                         int damage = rs.getInt("damage");
                         WeaponHandleType handleType = WeaponHandleType.valueOf(rs.getString("handletype"));
-                            try{
-                            insertWeapon(1, weaponID);
+
+                        int newId = -1;
+                        try{
+                            newId = insertWeapon(1, weaponID);
                         } catch (NotEnoughInventorySpaceException e){
                             System.out.println("Error: " + e.getMessage());
                         } catch (TooMuchWeightException e){
@@ -161,27 +163,33 @@ public class DBRepo {
                         } catch (SQLException e){
                             System.out.println(e.getMessage());
                         }
-                        return new Weapon(name, weaponType, rarity, weight, valuee, damage, handleType);
+                        Weapon w = new Weapon(name, weaponType, rarity, weight, valuee, damage, handleType);
+                        if(newId >-1){
+                            w.setDbId(newId);
+                        }
+                        return w;
+
                         }
                     break;
 
                     case 2:
-                        String sql4 = "Select * from armor ORDER BY Rand() Limit 1\n";
-                        PreparedStatement ps4 = c.prepareStatement(sql4);
-                        ResultSet rs1 = ps4.executeQuery();
+                        String sql2 = "Select * from armor ORDER BY Rand() Limit 1\n";
+                        PreparedStatement ps2 = con.prepareStatement(sql2);
+                        ResultSet rs2 = ps2.executeQuery();
                         System.out.println("name | rarity | weight | value | durability");
-                        while (rs1.next()) {
-                            int armorID = rs1.getInt("armorID");
-                            String name = rs1.getString("name");
-                            Rarity rarity = Rarity.valueOf(rs1.getString("rarity"));
-                            double weight = rs1.getDouble("weight");
-                            int valuee = rs1.getInt("valuee");
-                            int durability =  rs1.getInt("durability");
-                            ArmorPlacement armorPlacement = ArmorPlacement.valueOf(rs1.getString("armorPlacement"));
+                        while (rs2.next()) {
+                            int armorID = rs2.getInt("armorID");
+                            String name = rs2.getString("name");
+                            Rarity rarity = Rarity.valueOf(rs2.getString("rarity"));
+                            double weight = rs2.getDouble("weight");
+                            int valuee = rs2.getInt("valuee");
+                            int durability =  rs2.getInt("durability");
+                            ArmorPlacement armorPlacement = ArmorPlacement.valueOf(rs2.getString("armorPlacement"));
                             System.out.printf("%s | %s | %.1f | %d | %d%n", name, rarity, weight, valuee, durability);
 
+                            int newId = -1;
                             try{
-                                insertArmor(1, armorID);
+                                newId = insertArmor(1, armorID);
                             } catch (NotEnoughInventorySpaceException e){
                                 System.out.println("Error: " + e.getMessage());
                             } catch (TooMuchWeightException e){
@@ -190,24 +198,29 @@ public class DBRepo {
                                 System.out.println(e.getMessage());
                             }
 
-                        return new Armor(name, rarity, weight, valuee, durability, armorPlacement);
+                        Armor a = new Armor(name, rarity, weight, valuee, durability, armorPlacement);
+                            if(newId > 0){
+                                a.setDbId(newId);
+                            }
+                            return a;
                         }
                         break;
                     case 3:
-                        String sql5 = "Select * from consumable ORDER BY Rand() Limit 1\n";
-                        PreparedStatement ps2 = c.prepareStatement(sql5);
-                        ResultSet rs2 = ps2.executeQuery();
-                        while (rs2.next()) {
-                            int consumableID = rs2.getInt("consumableID");
-                            String name = rs2.getString("name");
-                            double weight = rs2.getDouble("weight");
-                            int valuee = rs2.getInt("valuee");
-                            String description = rs2.getString("description");
-                            ConsumableType consumableType = ConsumableType.valueOf(rs2.getString("consumableType"));
+                        String sql3 = "Select * from consumable ORDER BY Rand() Limit 1\n";
+                        PreparedStatement ps3 = con.prepareStatement(sql3);
+                        ResultSet rs3 = ps3.executeQuery();
+                        while (rs3.next()) {
+                            int consumableID = rs3.getInt("consumableID");
+                            String name = rs3.getString("name");
+                            double weight = rs3.getDouble("weight");
+                            int valuee = rs3.getInt("valuee");
+                            String description = rs3.getString("description");
+                            ConsumableType consumableType = ConsumableType.valueOf(rs3.getString("consumableType"));
                             System.out.printf("%s | %.1f | %d | %s", name, weight, valuee, description);
 
+                            int newId = -1;
                             try {
-                                insertConsumable(1, consumableID);
+                                newId = insertConsumable(1, consumableID);
                             } catch (NotEnoughInventorySpaceException e){
                                 System.out.println("Error: " + e.getMessage());
                             } catch (TooMuchWeightException e){
@@ -215,7 +228,10 @@ public class DBRepo {
                             } catch (SQLException e){
                                 System.out.println(e.getMessage());
                             }
-                            return new Consumable(name, weight, valuee, description, consumableType);
+                            Consumable c = new Consumable(name, weight, valuee, description, consumableType);
+                            if(newId > -1){
+                                c.setDbId(newId);
+                            }
                         }
                         break;
                 }
@@ -253,8 +269,7 @@ public class DBRepo {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    int newId = keys.getInt(1);
-                    return newId;
+                    return keys.getInt(1);
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -271,8 +286,7 @@ public class DBRepo {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    int newId = keys.getInt(1);
-                    return newId;
+                    return keys.getInt(1);
                 }
             } catch (SQLException e){
                 e.printStackTrace();
