@@ -19,7 +19,6 @@ import java.util.List;
 
 public class DBRepo {
     private final DBConnection db;
-    int rand = (int) (Math.random() * 3);
     public DBRepo(DBConnection db) {
         this.db = db;
     }
@@ -76,7 +75,7 @@ public class DBRepo {
 
             //Weapons (Ændrer String-navnet for at vise hvilken query der hører til hvilket item)
             String sqlWeapons = "SELECT w.name, w.weaponType, w.rarity, w.weight, w.valuee, w.damage, w.handleType, hw.id AS hw_id " +
-                    "FROM HasWeapon hw " +
+                    "FROM Hasitem hw " +
                     "JOIN Weapon w ON w.weaponId = hw.weaponId " +
                     "WHERE hw.inventoryId = 1"; //Da vi kun har 1 adventurer, er inventoryId sat til 1 (Kan ændres senere)
             try (PreparedStatement ps = conn.prepareStatement(sqlWeapons);
@@ -100,7 +99,7 @@ public class DBRepo {
 
             //Armor
             String sqlArmor = "SELECT a.name, a.rarity, a.weight, a.valuee, a.durability, a.armorPlacement, ha.id AS ha_id " +
-                    "FROM HasArmor ha " +
+                    "FROM Hasitem ha " +
                     "JOIN Armor a ON a.armorId = ha.armorId " +
                     "WHERE ha.inventoryId = 1";
             try (PreparedStatement ps = conn.prepareStatement(sqlArmor);
@@ -121,7 +120,7 @@ public class DBRepo {
 
             //Consumables
             String sqlConsumables = "SELECT c.name, c.weight, c.valuee, c.description, c.consumableType, hc.id AS hc_id " +
-                    "FROM HasConsumable hc " +
+                    "FROM Hasitem hc " +
                     "JOIN Consumable c ON c.consumableId = hc.consumableId " +
                     "WHERE hc.inventoryId = 1";
             try (PreparedStatement ps = conn.prepareStatement(sqlConsumables);
@@ -148,9 +147,9 @@ public class DBRepo {
 
     public  GeneratedItem generateItem() throws Exception {
         try(Connection con = db.get()) {
-            int times = rand;
+            int times = (int) (Math.random() * 3) + 1;
             for (int i = 0; i < times; i++) {
-                int choice = 2;
+                int choice = 3;
                 switch (choice) {
                     case 1:
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";
@@ -213,7 +212,7 @@ public class DBRepo {
         return null;
     }
     public int insertWeapon(int invId, int weaponId) throws Exception {
-            String sqlw = "INSERT INTO hasWeapon(inventoryId, weaponId) VALUES (?,?)";
+            String sqlw = "INSERT INTO hasitem(inventoryId, weaponId) VALUES (?,?)";
         try(Connection c = db.get()) {
             PreparedStatement ps = c.prepareStatement(sqlw, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, invId);
@@ -233,7 +232,7 @@ public class DBRepo {
         return -1;
     }
     public int insertConsumable(int invId, int consumableId) throws Exception {
-        String sqlc = "INSERT INTO hasConsumable(inventoryId, consumableId) VALUES (?,?)";
+        String sqlc = "INSERT INTO hasitem(inventoryId, consumableId) VALUES (?,?)";
         try(Connection c = db.get()) {
             PreparedStatement ps = c.prepareStatement(sqlc, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, invId);
@@ -242,7 +241,9 @@ public class DBRepo {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    return keys.getInt(1);
+                    int newId = keys.getInt(1);
+                    System.out.println("Indsat id = " + newId);
+                    return newId;
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
@@ -251,15 +252,18 @@ public class DBRepo {
         return -1;
     }
     public int insertArmor(int invId, int armorId) throws Exception {
-        String sqla = "INSERT INTO hasArmor(inventoryId, armorId) VALUES (?,?)";
+        String sqla = "INSERT INTO hasitem(inventoryId, armorId) VALUES (?,?)";
         try(Connection c = db.get()) {
             PreparedStatement ps = c.prepareStatement(sqla, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, invId);
-            ps.setInt(1,armorId);
+            ps.setInt(2,armorId);
+            ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
-                    return keys.getInt(1);
+                    int newId = keys.getInt(1);
+                    System.out.println("Indsat id = " + newId);
+                    return newId;
                 }
             } catch (SQLException e){
                 e.printStackTrace();
@@ -270,7 +274,7 @@ public class DBRepo {
 
 
     public boolean deleteWeapon(int hasId) throws Exception {
-        String sql = "DELETE FROM hasWeapon WHERE id = ?";
+        String sql = "DELETE FROM hasitem WHERE id = ?";
         try (Connection c = db.get();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, hasId);
@@ -279,7 +283,7 @@ public class DBRepo {
         }
     }
     public boolean deleteArmor(int hasId) throws Exception {
-        String sql = "DELETE FROM hasArmor WHERE id = ?";
+        String sql = "DELETE FROM hasitem WHERE id = ?";
         try (Connection c = db.get();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, hasId);
@@ -288,7 +292,7 @@ public class DBRepo {
         }
     }
     public boolean deleteConsumable(int hasId) throws Exception {
-        String sql = "DELETE FROM hasConsumable WHERE id = ?";
+        String sql = "DELETE FROM hasitem WHERE id = ?";
         try (Connection c = db.get();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, hasId);

@@ -10,9 +10,9 @@ import Logic.GameLogic;
 import Logic.Inventory.Inventory;
 
 public class Adventurer {
-    private DBConnection db = new DBConnection();
-    private DBRepo dbRepo = new DBRepo(db);
-    private Inventory inv = new Inventory(0,16,192,32,50,32, 0);
+    private DBConnection db;
+    private DBRepo dbRepo;
+    private Inventory inv;
     private GameLogic gameLogic;
 
 public Adventurer() {
@@ -55,11 +55,11 @@ public Adventurer() {
         }
         int newId = -1;
 
-        if ("weapon".equals(gen.category) && (item instanceof Weapon)) {
+        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
             newId = dbRepo.insertWeapon(1, gen.templateId);
-        } else if ("armor".equals(gen.category) && (item instanceof Armor)) {
+        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
             newId = dbRepo.insertArmor(1, gen.templateId);
-        } else if ("consumable".equals(gen.category) && (item instanceof Consumable)) {
+        } else if (gen.category.equals("consumable") && (item instanceof Consumable)) {
             newId = dbRepo.insertConsumable(1, gen.templateId);
         }
 

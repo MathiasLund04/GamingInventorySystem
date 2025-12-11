@@ -14,9 +14,8 @@ import java.util.Random;
 public class Inventory {
     Random rand = new Random();
     private final int maxWeight = 50;
-    private final int maxStack = 32;
+    private static final int maxStack = 5;
     private int coins;
-    private final int maxPotionStack = 16;
     private final int maxSlots = 192;
     private int unlockedSlots = 32;
     private double totalWeight;
@@ -46,11 +45,8 @@ public class Inventory {
     public int getCoins() {
         return coins;
     }
-    public int getMaxStack() {
+    public static int getMaxStack() {
         return maxStack;
-    }
-    public int getMaxPotionStack() {
-        return maxPotionStack;
     }
     public int getMaxSlots() {
         return maxSlots;
@@ -121,7 +117,7 @@ public class Inventory {
             } else if (item instanceof Armor a){
                 System.out.printf(" %d | %s | %s | %.1f | %d | %d%n",a.getDbId(), a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
             } else if (item instanceof Consumable c){
-                System.out.printf("%d | %s | %.1f | %d | %s%n",c.getDbId(), c.getName(), c.getWeight(), c.getValue(), c.getDescription());
+                System.out.printf("%d | %s | %.1f | %d | %s | %d/%d%n",c.getDbId(), c.getName(), c.getWeight(), c.getValue(), c.getDescription(), c.getConsumableCount(), getMaxStack());
             }
         }
         if (slots.isEmpty()){

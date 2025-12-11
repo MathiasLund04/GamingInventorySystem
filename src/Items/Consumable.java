@@ -1,6 +1,7 @@
 package Items;
 
 import Enums.ConsumableType;
+import Logic.Inventory.Inventory;
 
 public class Consumable extends Item {
     private String description;
@@ -33,7 +34,7 @@ public class Consumable extends Item {
 
     @Override
     public String toString() {
-        return "Name     |  Weight  |   Value    |  Description   |   Type of Consumable  \n" +
-                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDescription() + " | " + getConsumableType() + "\n";
+        return "Name     |  Weight  |   Value    |  Description   |   Type of Consumable    |   Stack count      \n" +
+                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDescription() + " | " + getConsumableType() + " | " + getConsumableCount() + "/" + Inventory.getMaxStack() + "\n";
     }
 }

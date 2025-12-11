@@ -46,7 +46,6 @@ public class Menu {
                         System.out.print("Enter the Id of the item to delete: ");
                         int deleteID = input.nextInt();
                         input.nextLine();
-
                         Item found = null;
                         for (Item it : inv.getSlots()) {
                             if (it.getDbId() == deleteID) {
@@ -54,7 +53,6 @@ public class Menu {
                                 break;
                             }
                         }
-
                         if (found == null) {
                             System.out.println("Item with Id " + deleteID + " not found in inventory.");
                             break;
@@ -69,7 +67,6 @@ public class Menu {
                                 break;
                             }
                         }
-
                         boolean dbDeleted = false;
                         try {
                             if (found instanceof Weapon) {
