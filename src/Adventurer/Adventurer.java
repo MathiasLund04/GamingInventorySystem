@@ -50,12 +50,11 @@ public Adventurer() {
                 }
             }
         }
-        // Check capacity/weight before inserting into DB
         if (!inv.addItemCheck(item)) {
             return "Not enough room or carry capacity to add item";
         }
         int newId = -1;
-        // Insert into hasX table after we know the inventory can accept it
+
         if ("weapon".equals(gen.category) && (item instanceof Weapon)) {
             newId = dbRepo.insertWeapon(1, gen.templateId);
         } else if ("armor".equals(gen.category) && (item instanceof Armor)) {
@@ -68,7 +67,6 @@ public Adventurer() {
             item.setDbId(newId);
         }
 
-        // Finally add item to in-memory inventory
         String added = inv.addItem(item);
         return added;
     }
