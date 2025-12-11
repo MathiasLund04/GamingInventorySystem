@@ -7,6 +7,7 @@ import Items.Weapon;
 import Logic.DBRepo;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -129,12 +130,22 @@ public class Inventory {
         return slots.toString();
     }
 
-    //Bruges til når der hentes fra DB så ikke der er gentagelser
     public void clearItems(){
         slots.clear();
     }
 
-
+    public Item removeItemByDbId(int dbId) {
+        Iterator<Item> it = slots.iterator();
+        while (it.hasNext()) {
+            Item item = it.next();
+            if (item.getDbId() == dbId) {
+                it.remove();
+                setTotalWeight((int) calculateTotalWeight());
+                return item;
+            }
+        }
+        return null;
+    }
 
 
 }

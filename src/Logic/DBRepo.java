@@ -24,6 +24,19 @@ public class DBRepo {
         this.db = db;
     }
 
+    public static class GeneratedItem {
+        public final Item item;
+        public final int templateId;
+        public final String category;
+
+        public GeneratedItem(Item item, int templateId, String category) {
+            this.item = item;
+            this.templateId = templateId;
+            this.category = category;
+        }
+    }
+
+
     //Test af forbindelse
     public void testConnection() {
         try (Connection c = db.get()) {
@@ -133,7 +146,7 @@ public class DBRepo {
         return inventory;
     }
 
-    public  Item generateItem() throws Exception {
+    public  GeneratedItem generateItem() throws Exception {
         try(Connection con = db.get()) {
             int times = rand;
             for (int i = 0; i < times; i++) {
@@ -152,22 +165,8 @@ public class DBRepo {
                         int valuee = rs.getInt("valuee");
                         int damage = rs.getInt("damage");
                         WeaponHandleType handleType = WeaponHandleType.valueOf(rs.getString("handletype"));
-
-                        int newId = -1;
-                        try{
-                            newId = insertWeapon(1, weaponID);
-                        } catch (NotEnoughInventorySpaceException e){
-                            System.out.println("Error: " + e.getMessage());
-                        } catch (TooMuchWeightException e){
-                            System.out.println(e.getMessage());
-                        } catch (SQLException e){
-                            System.out.println(e.getMessage());
-                        }
                         Weapon w = new Weapon(name, weaponType, rarity, weight, valuee, damage, handleType);
-                        if(newId >-1){
-                            w.setDbId(newId);
-                        }
-                        return w;
+                        return new GeneratedItem(w,weaponID,"weapon");
 
                         }
                     break;
@@ -187,22 +186,8 @@ public class DBRepo {
                             ArmorPlacement armorPlacement = ArmorPlacement.valueOf(rs2.getString("armorPlacement"));
                             System.out.printf("%s | %s | %.1f | %d | %d%n", name, rarity, weight, valuee, durability);
 
-                            int newId = -1;
-                            try{
-                                newId = insertArmor(1, armorID);
-                            } catch (NotEnoughInventorySpaceException e){
-                                System.out.println("Error: " + e.getMessage());
-                            } catch (TooMuchWeightException e){
-                                System.out.println(e.getMessage());
-                            } catch (SQLException e){
-                                System.out.println(e.getMessage());
-                            }
-
                         Armor a = new Armor(name, rarity, weight, valuee, durability, armorPlacement);
-                            if(newId > 0){
-                                a.setDbId(newId);
-                            }
-                            return a;
+                            return new GeneratedItem(a,armorID,"armor");
                         }
                         break;
                     case 3:
@@ -218,20 +203,8 @@ public class DBRepo {
                             ConsumableType consumableType = ConsumableType.valueOf(rs3.getString("consumableType"));
                             System.out.printf("%s | %.1f | %d | %s", name, weight, valuee, description);
 
-                            int newId = -1;
-                            try {
-                                newId = insertConsumable(1, consumableID);
-                            } catch (NotEnoughInventorySpaceException e){
-                                System.out.println("Error: " + e.getMessage());
-                            } catch (TooMuchWeightException e){
-                                System.out.println(e.getMessage());
-                            } catch (SQLException e){
-                                System.out.println(e.getMessage());
-                            }
                             Consumable c = new Consumable(name, weight, valuee, description, consumableType);
-                            if(newId > -1){
-                                c.setDbId(newId);
-                            }
+                            return new GeneratedItem(c,consumableID,"consumable");
                         }
                         break;
                 }
@@ -293,5 +266,34 @@ public class DBRepo {
             }
         }
         return -1;
+    }
+
+
+    public boolean deleteWeapon(int hasId) throws Exception {
+        String sql = "DELETE FROM hasWeapon WHERE id = ?";
+        try (Connection c = db.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, hasId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+    public boolean deleteArmor(int hasId) throws Exception {
+        String sql = "DELETE FROM hasArmor WHERE id = ?";
+        try (Connection c = db.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, hasId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
+    }
+    public boolean deleteConsumable(int hasId) throws Exception {
+        String sql = "DELETE FROM hasConsumable WHERE id = ?";
+        try (Connection c = db.get();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, hasId);
+            int affected = ps.executeUpdate();
+            return affected > 0;
+        }
     }
 }

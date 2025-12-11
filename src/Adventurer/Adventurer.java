@@ -1,32 +1,76 @@
 package Adventurer;
 
+import Items.Armor;
+import Items.Consumable;
 import Items.Item;
+import Items.Weapon;
 import Logic.DBConnection;
 import Logic.DBRepo;
 import Logic.GameLogic;
 import Logic.Inventory.Inventory;
 
 public class Adventurer {
-    DBConnection db = new DBConnection();
-    DBRepo dbRepo = new DBRepo(db);
-    Inventory inv = new Inventory(0,16,192,32,50,32, 0);
-    GameLogic gameLogic = new GameLogic(inv, dbRepo);
+    private DBConnection db = new DBConnection();
+    private DBRepo dbRepo = new DBRepo(db);
+    private Inventory inv = new Inventory(0,16,192,32,50,32, 0);
+    private GameLogic gameLogic;
 
-public Adventurer() {}
+public Adventurer() {
+    this.db = new DBConnection();
+    this.dbRepo = new DBRepo(db);
+    this.inv = new Inventory(0,16,192,32,50,32, 0);
+    this.gameLogic = new GameLogic(inv, dbRepo);
+
+}
 
     public Adventurer(Inventory inventory, DBRepo dbRepo) {
-        if (inventory != null) this.inv = inventory;
-        if (dbRepo != null) this.dbRepo = dbRepo;
-        this.gameLogic = new GameLogic(this.inv, this.dbRepo);
+        this.db = new DBConnection();
+        this.dbRepo = dbRepo != null ? dbRepo : new DBRepo(db);
+        this.inv = inventory != null ? inventory : new Inventory(0,16,192,32,50,32, 0);
+        this.gameLogic = new GameLogic(inv, this.dbRepo);
     }
 
     public String goOnAdventure() throws Exception {
-        Item generated = dbRepo.generateItem();
-        if (generated != null) {
-            return "no item has been generated";
+        DBRepo.GeneratedItem gen = dbRepo.generateItem();
+        if (gen == null || gen.item == null) {
+            return "No item generated.";
         }
-        String addedItem = inv.addItem(generated);
-        return addedItem;
+        Item item = gen.item;
+
+        // checker hvis item er conumable og allerade er der, så stacker den
+        if (item instanceof Consumable) {
+            for (Item i : inv.getSlots()) {
+                if (i instanceof Consumable) {
+                    Consumable existing = (Consumable) i;
+                    if (existing.getName().equals(item.getName())) {
+                        existing.consumableCount++;
+                        inv.setTotalWeight((int) inv.calculateTotalWeight());
+                        return existing.getName() + " stacked to " + existing.getConsumableCount();
+                    }
+                }
+            }
+        }
+        // Check capacity/weight before inserting into DB
+        if (!inv.addItemCheck(item)) {
+            return "Not enough room or carry capacity to add item";
+        }
+        int newId = -1;
+        // Insert into hasX table after we know the inventory can accept it
+        if ("weapon".equals(gen.category) && (item instanceof Weapon)) {
+            newId = dbRepo.insertWeapon(1, gen.templateId);
+        } else if ("armor".equals(gen.category) && (item instanceof Armor)) {
+            newId = dbRepo.insertArmor(1, gen.templateId);
+        } else if ("consumable".equals(gen.category) && (item instanceof Consumable)) {
+            newId = dbRepo.insertConsumable(1, gen.templateId);
+        }
+
+        if (newId > 0) {
+            item.setDbId(newId);
+        }
+
+        // Finally add item to in-memory inventory
+        String added = inv.addItem(item);
+        return added;
     }
 
 
