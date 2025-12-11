@@ -31,6 +31,11 @@ public Adventurer() {
     }
 
     public String goOnAdventure() throws Exception {
+        int addedCoins = generateCoins();
+        inv.setCoins(inv.getCoins() + addedCoins);
+        dbRepo.insertCoins(inv.getCoins());
+        String msg = "You found " + addedCoins + " coins on your adventure!";
+
         DBRepo.GeneratedItem gen = dbRepo.generateItem();
         if (gen == null || gen.item == null) {
             return "No item generated.";
@@ -69,7 +74,12 @@ public Adventurer() {
         }
 
         String added = inv.addItem(item);
-        return added;
+        return msg + "\n" + added;
+    }
+
+    public int generateCoins(){
+        int rand = (int)(Math.random() * 10) + 1;
+        return rand;
     }
 
 

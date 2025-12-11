@@ -29,11 +29,15 @@ public class Consumable extends Item {
         this.consumableCount = consumableCount;
     }
 
-    public void setConsumableType(ConsumableType consumableType) {
-        this.consumableType = consumableType;
+    public void increaseQuantity(int amount){
+        this.consumableCount += amount;
     }
-    public void setDescription(String description) {
-        this.description = description;
+    public void decreaseQuantity(int amount)
+    {
+        if(this.consumableCount >= amount)
+        {
+            this.consumableCount -= amount;
+        }
     }
 
     @Override

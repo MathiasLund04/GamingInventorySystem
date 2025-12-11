@@ -300,4 +300,16 @@ public class DBRepo {
             return affected > 0;
         }
     }
+
+    public void insertCoins(int coins) throws Exception {
+        String sql = "UPDATE Inventory SET coins = ? WHERE inventoryId = 1;";
+
+        try (Connection c = db.get();
+            PreparedStatement ps = c.prepareStatement(sql)){
+            ps.setInt(1,coins);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

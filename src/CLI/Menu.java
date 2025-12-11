@@ -81,6 +81,7 @@ public class Menu {
                         }
 
                         if (dbDeleted) {
+
                             inv.removeItemByDbId(deleteID);
                             System.out.println("Item removed successfully.");
                         } else {
