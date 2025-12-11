@@ -61,7 +61,7 @@ public class Menu {
                         if (found instanceof Consumable) {
                             Consumable c = (Consumable) found;
                             if (c.getConsumableCount() > 1) {
-                                c.consumableCount--;
+                                c.setConsumableCount(c.getConsumableCount() - 1);
                                 inv.setTotalWeight((int) inv.calculateTotalWeight());
                                 System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
                                 break;

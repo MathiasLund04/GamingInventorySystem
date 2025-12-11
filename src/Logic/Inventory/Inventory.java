@@ -89,7 +89,7 @@ public class Inventory {
                    Consumable existingConsumable = (Consumable) i;
 
                    if (existingConsumable.getName().equals(newConsumable.getName())){
-                       existingConsumable.consumableCount++;
+                       existingConsumable.setConsumableCount(existingConsumable.getConsumableCount() + 1);
                        msg = existingConsumable.getName() + " stacked to " + existingConsumable.getConsumableCount();
                        return msg;
                    }

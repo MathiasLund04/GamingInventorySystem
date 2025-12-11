@@ -37,6 +37,15 @@ public Adventurer() {
         }
         Item item = gen.item;
 
+        int newId = -1;
+        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
+            newId = dbRepo.insertWeapon(1, gen.templateId);
+        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
+            newId = dbRepo.insertArmor(1, gen.templateId);
+        } else if (gen.category.equals("consumable") && (item instanceof Consumable)) {
+            newId = dbRepo.insertConsumable(1, gen.templateId);
+        }
+
         // checker hvis item er conumable og allerade er der, så stacker den
         if (item instanceof Consumable) {
             for (Item i : inv.getSlots()) {
@@ -53,15 +62,7 @@ public Adventurer() {
         if (!inv.addItemCheck(item)) {
             return "Not enough room or carry capacity to add item";
         }
-        int newId = -1;
 
-        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
-            newId = dbRepo.insertWeapon(1, gen.templateId);
-        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
-            newId = dbRepo.insertArmor(1, gen.templateId);
-        } else if (gen.category.equals("consumable") && (item instanceof Consumable)) {
-            newId = dbRepo.insertConsumable(1, gen.templateId);
-        }
 
         if (newId > 0) {
             item.setDbId(newId);

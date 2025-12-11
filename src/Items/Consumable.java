@@ -12,7 +12,7 @@ public class Consumable extends Item {
         super(name, weight, value);
         this.description = description;
         this.consumableType = consumableType;
-        this.consumableCount = 0;
+        this.consumableCount = 1;
     }
 
     public String getDescription() {
@@ -23,6 +23,10 @@ public class Consumable extends Item {
     }
     public int getConsumableCount() {
         return consumableCount;
+    }
+
+    public void setConsumableCount(int consumableCount) {
+        this.consumableCount = consumableCount;
     }
 
     public void setConsumableType(ConsumableType consumableType) {
