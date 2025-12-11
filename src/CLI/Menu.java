@@ -61,9 +61,19 @@ public class Menu {
                         if (found instanceof Consumable) {
                             Consumable c = (Consumable) found;
                             if (c.getConsumableCount() > 1) {
-                                c.setConsumableCount(c.getConsumableCount() - 1);
-                                inv.setTotalWeight((int) inv.calculateTotalWeight());
-                                System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
+                                boolean dbDecremented = false;
+                                try {
+                                    dbDecremented = dbRepo.deleteConsumable(c.getDbId());
+                                } catch (Exception e) {
+                                    System.out.println("Error decrementing consumable in DB: " + e.getMessage());
+                                }
+                                if (dbDecremented) {
+                                    c.consumableCount--;
+                                    inv.setTotalWeight((int) inv.calculateTotalWeight());
+                                    System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
+                                } else {
+                                    System.out.println("Failed to decrement consumable in database.");
+                                }
                                 break;
                             }
                         }
@@ -81,7 +91,13 @@ public class Menu {
                         }
 
                         if (dbDeleted) {
-
+                            for (Item it : inv.getSlots()) {
+                                if (it.getDbId() == deleteID) {
+                                    int addingCoins = it.getValue();
+                                    inv.setCoins(inv.getCoins() + addingCoins);
+                                    dbRepo.updateCoins(inv.getCoins());
+                                }
+                            }
                             inv.removeItemByDbId(deleteID);
                             System.out.println("Item removed successfully.");
                         } else {

@@ -90,7 +90,7 @@ public class Inventory {
 
                    if (existingConsumable.getName().equals(newConsumable.getName())){
                        if(existingConsumable.getConsumableCount() < getMaxStack()) {
-                           existingConsumable.increaseQuantity(newConsumable.getConsumableCount());
+                           existingConsumable.increaseQuantity(existingConsumable.getConsumableCount());
                            msg = existingConsumable.getName() + " stacked to " + existingConsumable.getConsumableCount();
                            return msg;
                        }

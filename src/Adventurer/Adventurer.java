@@ -30,51 +30,63 @@ public Adventurer() {
         this.gameLogic = new GameLogic(inv, this.dbRepo);
     }
 
-    public String goOnAdventure() throws Exception {
-        int addedCoins = generateCoins();
+    public StringBuilder goOnAdventure() throws Exception {
+    StringBuilder msg = new StringBuilder();
+    int addedCoins = generateCoins();
         inv.setCoins(inv.getCoins() + addedCoins);
-        dbRepo.insertCoins(inv.getCoins());
-        String msg = "You found " + addedCoins + " coins on your adventure!";
+        dbRepo.updateCoins(inv.getCoins());
+        msg.append("You found " + addedCoins + " coins on your adventure! \n");
 
-        DBRepo.GeneratedItem gen = dbRepo.generateItem();
-        if (gen == null || gen.item == null) {
-            return "No item generated.";
-        }
-        Item item = gen.item;
 
-        int newId = -1;
-        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
-            newId = dbRepo.insertWeapon(1, gen.templateId);
-        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
-            newId = dbRepo.insertArmor(1, gen.templateId);
-        } else if (gen.category.equals("consumable") && (item instanceof Consumable)) {
-            newId = dbRepo.insertConsumable(1, gen.templateId);
-        }
+            DBRepo.GeneratedItem gen = dbRepo.generateItem();
 
-        // checker hvis item er conumable og allerade er der, så stacker den
-        if (item instanceof Consumable) {
-            for (Item i : inv.getSlots()) {
-                if (i instanceof Consumable) {
-                    Consumable existing = (Consumable) i;
-                    if (existing.getName().equals(item.getName())) {
-                        existing.consumableCount++;
-                        inv.setTotalWeight((int) inv.calculateTotalWeight());
-                        return existing.getName() + " stacked to " + existing.getConsumableCount();
+            if (gen == null || gen.item == null) {
+                return msg.append("No item generated.");
+            }
+            Item item = gen.item;
+
+            int newId = -1;
+            if (gen.category.equals("weapon") && (item instanceof Weapon)) {
+                newId = dbRepo.insertWeapon(1, gen.templateId);
+            } else if (gen.category.equals("armor") && (item instanceof Armor)) {
+                newId = dbRepo.insertArmor(1, gen.templateId);
+            } else if (gen.category.equals("consumable") && (item instanceof Consumable)) {
+                newId = dbRepo.insertConsumable(1, gen.templateId);
+            }
+
+            // checker hvis item er conumable og allerade er der, så stacker den
+            if (item instanceof Consumable) {
+                for (Item i : inv.getSlots()) {
+                    if (i instanceof Consumable) {
+                        Consumable existing = (Consumable) i;
+                        if (existing.getName().equals(item.getName())) {
+                            try {
+                                int hasId = dbRepo.insertConsumable(1, gen.templateId);
+                                if (hasId > 0) {
+                                    existing.setDbId(hasId);
+                                }
+                            } catch (Exception e) {
+                                e.getMessage();
+                            }
+                            existing.consumableCount++;
+                            inv.setTotalWeight((int) inv.calculateTotalWeight());
+                            return msg.append(existing.getName() + " stacked to " + existing.getConsumableCount());
+                        }
                     }
                 }
             }
-        }
-        if (!inv.addItemCheck(item)) {
-            return "Not enough room or carry capacity to add item";
-        }
+            if (!inv.addItemCheck(item)) {
+                return msg.append("Not enough room or carry capacity to add item");
+            }
 
 
-        if (newId > 0) {
-            item.setDbId(newId);
-        }
+            if (newId > 0) {
+                item.setDbId(newId);
+            }
 
-        String added = inv.addItem(item);
-        return msg + "\n" + added;
+            msg.append(inv.addItem(item));
+
+        return msg;
     }
 
     public int generateCoins(){

@@ -119,7 +119,7 @@ public class DBRepo {
             }
 
             //Consumables
-            String sqlConsumables = "SELECT c.name, c.weight, c.valuee, c.description, c.consumableType, hc.id AS hc_id " +
+            String sqlConsumables = "SELECT c.name, c.weight, c.valuee, c.description, c.consumableType, hc.quantity, hc.id AS hc_id " +
                     "FROM Hasitem hc " +
                     "JOIN Consumable c ON c.consumableId = hc.consumableId " +
                     "WHERE hc.inventoryId = 1";
@@ -134,6 +134,7 @@ public class DBRepo {
                             ConsumableType.valueOf(rs.getString("consumableType"))
                     );
                     c.setDbId(rs.getInt("hc_id"));
+                    c.setConsumableCount(rs.getInt("quantity"));
                     inventory.addItem(c);
                 }
 
@@ -147,8 +148,6 @@ public class DBRepo {
 
     public  GeneratedItem generateItem() throws Exception {
         try(Connection con = db.get()) {
-            int times = (int) (Math.random() * 3) + 1;
-            for (int i = 0; i < times; i++) {
                 int choice = 3;
                 switch (choice) {
                     case 1:
@@ -208,7 +207,6 @@ public class DBRepo {
                         break;
                 }
             }
-        }
         return null;
     }
     public int insertWeapon(int invId, int weaponId) throws Exception {
@@ -232,23 +230,39 @@ public class DBRepo {
         return -1;
     }
     public int insertConsumable(int invId, int consumableId) throws Exception {
-        String sqlc = "INSERT INTO hasitem(inventoryId, consumableId) VALUES (?,?)";
         try(Connection c = db.get()) {
-            PreparedStatement ps = c.prepareStatement(sqlc, Statement.RETURN_GENERATED_KEYS);
-            ps.setInt(1, invId);
-            ps.setInt(2, consumableId);
-            ps.executeUpdate();
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    int newId = keys.getInt(1);
-                    System.out.println("Indsat id = " + newId);
-                    return newId;
+        String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE id = ? AND quantity >= 1 AND quantity <5";
+            try (PreparedStatement ps = c.prepareStatement(updateSql)) {
+                ps.setInt(1, consumableId);
+                int updated = ps.executeUpdate();
+                if (updated > 0) {
+                    String selectSql = "SELECT id FROM Hasitem WHERE inventoryId = ? AND consumableId = ?";
+                    try (PreparedStatement ps2 = c.prepareStatement(selectSql)) {
+                        ps2.setInt(1, invId);
+                        ps2.setInt(2, consumableId);
+                        try (ResultSet rs = ps2.executeQuery()) {
+                            if (rs.next()) {
+                                return rs.getInt(1);
+                            }
+                        }
+                    }
+                } else {
+                    String insertSql = "INSERT INTO hasitem(inventoryId, consumableId, quantity) VALUES (?,?,1)";
+                    try (PreparedStatement ps3 = c.prepareStatement(insertSql,Statement.RETURN_GENERATED_KEYS)) {
+                    ps3.setInt(1, invId);
+                    ps3.setInt(2, consumableId);
+                    ps3.executeUpdate();
+                    try (ResultSet rs = ps3.getGeneratedKeys()) {
+                        if (rs.next()) {
+                            return rs.getInt(1);
+                            }
+                        }
+                       }
+                    }
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        }
         return -1;
     }
     public int insertArmor(int invId, int armorId) throws Exception {
@@ -292,16 +306,25 @@ public class DBRepo {
         }
     }
     public boolean deleteConsumable(int hasId) throws Exception {
-        String sql = "DELETE FROM hasitem WHERE id = ?";
-        try (Connection c = db.get();
-             PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, hasId);
-            int affected = ps.executeUpdate();
-            return affected > 0;
+        try (Connection conn = db.get()) {
+            String decSql = "UPDATE Hasitem SET quantity = quantity - 1 WHERE id = ? AND quantity > 1";
+            try (PreparedStatement ps = conn.prepareStatement(decSql)) {
+                ps.setInt(1, hasId);
+                int decUpdated = ps.executeUpdate();
+                if (decUpdated > 0) {
+                    return true;
+                }
+            }
+            String delSql = "DELETE FROM Hasitem WHERE id = ?";
+            try (PreparedStatement ps2 = conn.prepareStatement(delSql)) {
+                ps2.setInt(1, hasId);
+                int deleted = ps2.executeUpdate();
+                return deleted > 0;
+            }
         }
     }
 
-    public void insertCoins(int coins) throws Exception {
+    public void updateCoins(int coins) throws Exception {
         String sql = "UPDATE Inventory SET coins = ? WHERE inventoryId = 1;";
 
         try (Connection c = db.get();
