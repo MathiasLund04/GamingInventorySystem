@@ -231,7 +231,7 @@ public class DBRepo {
     }
     public int insertConsumable(int invId, int consumableId) throws Exception {
         try(Connection c = db.get()) {
-        String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE id = ? AND consumableId = ? AND quantity >= 1 AND quantity <?";
+        String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE inventoryId = ? AND consumableId = ? AND quantity >= 1 AND quantity <?";
             try (PreparedStatement ps = c.prepareStatement(updateSql)) {
                 ps.setInt(1, invId);
                 ps.setInt(2, consumableId);
@@ -255,7 +255,7 @@ public class DBRepo {
                         psExist.setInt(2, consumableId);
                         try (ResultSet rs = psExist.executeQuery()) {
                             if (rs.next()) {
-                                // item exists but quantity == maxStack, return its id (no increment)
+
                                 return rs.getInt(1);
                             }
                         }
