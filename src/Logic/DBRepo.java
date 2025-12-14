@@ -231,9 +231,11 @@ public class DBRepo {
     }
     public int insertConsumable(int invId, int consumableId) throws Exception {
         try(Connection c = db.get()) {
-        String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE id = ? AND quantity >= 1 AND quantity <5";
+        String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE id = ? AND consumableId = ? AND quantity >= 1 AND quantity <?";
             try (PreparedStatement ps = c.prepareStatement(updateSql)) {
-                ps.setInt(1, consumableId);
+                ps.setInt(1, invId);
+                ps.setInt(2, consumableId);
+                ps.setInt(3, Inventory.getMaxStack());
                 int updated = ps.executeUpdate();
                 if (updated > 0) {
                     String selectSql = "SELECT id FROM Hasitem WHERE inventoryId = ? AND consumableId = ?";
@@ -247,6 +249,17 @@ public class DBRepo {
                         }
                     }
                 } else {
+                    String selectExist = "SELECT id FROM Hasitem WHERE inventoryId = ? AND consumableId = ?";
+                    try (PreparedStatement psExist = c.prepareStatement(selectExist)) {
+                        psExist.setInt(1, invId);
+                        psExist.setInt(2, consumableId);
+                        try (ResultSet rs = psExist.executeQuery()) {
+                            if (rs.next()) {
+                                // item exists but quantity == maxStack, return its id (no increment)
+                                return rs.getInt(1);
+                            }
+                        }
+                    }
                     String insertSql = "INSERT INTO hasitem(inventoryId, consumableId, quantity) VALUES (?,?,1)";
                     try (PreparedStatement ps3 = c.prepareStatement(insertSql,Statement.RETURN_GENERATED_KEYS)) {
                     ps3.setInt(1, invId);
