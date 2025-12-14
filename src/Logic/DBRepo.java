@@ -148,7 +148,7 @@ public class DBRepo {
 
     public  GeneratedItem generateItem() throws Exception {
         try(Connection con = db.get()) {
-                int choice = 3;
+                int choice = (int) (Math.random() * 3)+1;
                 switch (choice) {
                     case 1:
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";

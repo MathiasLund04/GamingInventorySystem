@@ -46,46 +46,50 @@ public Adventurer() {
         Item item = gen.item;
 
         int newId = -1;
-        if (item instanceof Consumable) {
-            for (Item i : inv.getSlots()) {
-                if (i instanceof Consumable) {
-                    Consumable existing = (Consumable) i;
-                    if (existing.getName().equals(item.getName())) {
-                        try {
-                            int hasId = dbRepo.insertConsumable(1, gen.templateId);
-                            if (hasId > 0) {
-                                existing.setDbId(hasId);
+        if (inv.addItemCheck(item)) {
+            if (item instanceof Consumable) {
+                for (Item i : inv.getSlots()) {
+                    if (i instanceof Consumable) {
+                        Consumable existing = (Consumable) i;
+                        if (existing.getName().equals(item.getName())) {
+                            if (existing.consumableCount < Inventory.getMaxStack()) {
+                                try {
+                                    int hasId = dbRepo.insertConsumable(1, gen.templateId);
+                                    if (hasId > 0) {
+                                        existing.setDbId(hasId);
+                                    }
+                                } catch (Exception e) {
+                                    e.getMessage();
+                                }
+                                existing.increaseQuantity(1);
+                                inv.setTotalWeight((int) inv.calculateTotalWeight());
+                                return msg.append(existing.getName() + " stacked to " + existing.getConsumableCount());
                             }
-                        } catch (Exception e) {
-                            e.getMessage();
                         }
-                        existing.increaseQuantity(1);
-                        inv.setTotalWeight((int) inv.calculateTotalWeight());
-                        return msg.append(existing.getName() + " stacked to " + existing.getConsumableCount());
                     }
                 }
+                if (!inv.addItemCheck(item)) {
+                    return msg.append("Not enough Room or carry capacity to add Item.");
+                }
+                newId = dbRepo.insertConsumable(1, gen.templateId);
+                if (newId > 0) {
+                    item.setDbId(newId);
+                }
+                msg.append(inv.addItem(item));
+                return msg;
             }
-            if (!inv.addItemCheck(item)) {
-                return msg.append("Not enough Room or carry capacity to add Item.");
-            }
-            newId = dbRepo.insertConsumable(1, gen.templateId);
-            if (newId > 0) {
-                item.setDbId(newId);
-            }
-            msg.append(inv.addItem(item));
-            return msg;
         }
 
-
-        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
-            newId = dbRepo.insertWeapon(1, gen.templateId);
-        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
-            newId = dbRepo.insertArmor(1, gen.templateId);
 
             // checker hvis item er conumable og allerade er der, så stacker den
             if (!inv.addItemCheck(item)) {
                 return msg.append("Not enough room or carry capacity to add item");
             }
+        if (gen.category.equals("weapon") && (item instanceof Weapon)) {
+            newId = dbRepo.insertWeapon(1, gen.templateId);
+        } else if (gen.category.equals("armor") && (item instanceof Armor)) {
+            newId = dbRepo.insertArmor(1, gen.templateId);
+
             if (newId > 0) {
                 item.setDbId(newId);
             }

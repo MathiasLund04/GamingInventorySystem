@@ -17,7 +17,7 @@ public class Inventory {
     private static final int maxStack = 5;
     private int coins;
     private final int maxSlots = 192;
-    private int unlockedSlots = 32;
+    private int unlockedSlots = 10;
     private double totalWeight;
     private DBRepo dbRepo;
 
@@ -71,11 +71,11 @@ public class Inventory {
     public boolean addItemCheck(Item item) {
             if(slots.size() >= unlockedSlots){
             return false;
-    }
-        if(getTotalWeight() + item.getWeight() > maxWeight) {
+          } else if(getTotalWeight() + item.getWeight() > maxWeight) {
             return false;
-        }
+        } else{
         return true;
+        }
     }
     public String addItem(Item item) {
        String msg = " ";
