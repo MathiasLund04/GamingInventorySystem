@@ -35,7 +35,11 @@ public Adventurer() {
         int addedCoins = generateCoins();
         inv.setCoins(inv.getCoins() + addedCoins);
         dbRepo.updateCoins(inv.getCoins());
-        msg.append("You found " + addedCoins + " coins on your adventure! \n");
+        if (addedCoins == 1){
+            msg.append("\nYou found " + addedCoins + " coin on your adventure! \n");
+        } else {
+            msg.append("\nYou found " + addedCoins + " coins on your adventure! \n");;
+        }
 
 
         DBRepo.GeneratedItem gen = dbRepo.generateItem();
@@ -52,7 +56,7 @@ public Adventurer() {
                     if (i instanceof Consumable) {
                         Consumable existing = (Consumable) i;
                         if (existing.getName().equals(item.getName())) {
-                            if (existing.consumableCount < Inventory.getMaxStack()) {
+                            if (existing.getConsumableCount() < Inventory.getMaxStack()) {
                                 try {
                                     int hasId = dbRepo.insertConsumable(1, gen.templateId);
                                     if (hasId > 0) {
@@ -69,7 +73,9 @@ public Adventurer() {
                     }
                 }
                 if (!inv.addItemCheck(item)) {
-                    return msg.append("Not enough Room or carry capacity to add Item.");
+                    msg.append(item);
+                    msg.append("\nNot enough Room or carry capacity to add this item.\n");
+                    return msg;
                 }
                 newId = dbRepo.insertConsumable(1, gen.templateId);
                 if (newId > 0) {
@@ -83,19 +89,22 @@ public Adventurer() {
 
             // checker hvis item er conumable og allerade er der, så stacker den
             if (!inv.addItemCheck(item)) {
-                return msg.append("Not enough room or carry capacity to add item");
+                msg.append(item);
+                msg.append("Not enough room or carry capacity to add item");
+                return msg;
             }
         if (gen.category.equals("weapon") && (item instanceof Weapon)) {
             newId = dbRepo.insertWeapon(1, gen.templateId);
         } else if (gen.category.equals("armor") && (item instanceof Armor)) {
             newId = dbRepo.insertArmor(1, gen.templateId);
-
-            if (newId > 0) {
-                item.setDbId(newId);
-            }
-            msg.append(inv.addItem(item));
         }
-            return msg;
+
+        if (newId > 0) {
+            item.setDbId(newId);
+        }
+        msg.append(inv.addItem(item));
+
+        return msg;
     }
 
 

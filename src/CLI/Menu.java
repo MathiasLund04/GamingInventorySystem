@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class Menu {
         static Scanner input = new Scanner(System.in);
-    public static void Menu() throws Exception {
+    public static void startMenu() throws Exception {
         int choice;
         DBConnection db = new DBConnection();
         DBRepo dbRepo = new DBRepo(db);
@@ -68,7 +68,7 @@ public class Menu {
                                     System.out.println("Error decrementing consumable in DB: " + e.getMessage());
                                 }
                                 if (dbDecremented) {
-                                    c.consumableCount--;
+                                    c.setConsumableCount(c.getConsumableCount() - 1);
                                     inv.setTotalWeight((int) inv.calculateTotalWeight());
                                     System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
                                 } else {
@@ -145,5 +145,12 @@ public class Menu {
             }
         }
         return Choice;
+    }
+
+    public static void inventoryMenu(){
+        System.out.println("1. Show inventory (Not sorted)");
+        System.out.println("2. Show inventory (Sorted by choice)");
+        System.out.println("3. Delete item");
+        System.out.println("4. Back to menu");
     }
 }

@@ -148,7 +148,8 @@ public class DBRepo {
 
     public  GeneratedItem generateItem() throws Exception {
         try(Connection con = db.get()) {
-                int choice = (int) (Math.random() * 3)+1;
+                int choice = 3;
+            //(int) (Math.random() * 3)+1
                 switch (choice) {
                     case 1:
                         String sql = "Select * from weapon ORDER BY Rand() Limit 1\n";
@@ -173,7 +174,6 @@ public class DBRepo {
                         String sql2 = "Select * from armor ORDER BY Rand() Limit 1\n";
                         PreparedStatement ps2 = con.prepareStatement(sql2);
                         ResultSet rs2 = ps2.executeQuery();
-                        System.out.println("name | rarity | weight | value | durability");
                         while (rs2.next()) {
                             int armorID = rs2.getInt("armorID");
                             String name = rs2.getString("name");
@@ -182,8 +182,6 @@ public class DBRepo {
                             int valuee = rs2.getInt("valuee");
                             int durability =  rs2.getInt("durability");
                             ArmorPlacement armorPlacement = ArmorPlacement.valueOf(rs2.getString("armorPlacement"));
-                            System.out.printf("%s | %s | %.1f | %d | %d%n", name, rarity, weight, valuee, durability);
-
                         Armor a = new Armor(name, rarity, weight, valuee, durability, armorPlacement);
                             return new GeneratedItem(a,armorID,"armor");
                         }
@@ -199,8 +197,6 @@ public class DBRepo {
                             int valuee = rs3.getInt("valuee");
                             String description = rs3.getString("description");
                             ConsumableType consumableType = ConsumableType.valueOf(rs3.getString("consumableType"));
-                            System.out.printf("%s | %.1f | %d | %s", name, weight, valuee, description);
-
                             Consumable c = new Consumable(name, weight, valuee, description, consumableType);
                             return new GeneratedItem(c,consumableID,"consumable");
                         }
@@ -347,5 +343,9 @@ public class DBRepo {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public void updateWeight(int weight){
+
     }
 }

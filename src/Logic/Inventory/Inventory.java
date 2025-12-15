@@ -38,10 +38,14 @@ public class Inventory {
     public double calculateTotalWeight() {
         double sum = 0;
         for (Item item : slots) {
+            if (item instanceof Consumable) {
+                sum += (item.getWeight()*((Consumable) item).getConsumableCount());
+            }
             sum += item.getWeight();
         }
         return sum;
     }
+
     public int getCoins() {
         return coins;
     }
@@ -69,6 +73,19 @@ public class Inventory {
     }
 
     public boolean addItemCheck(Item item) {
+        if (item instanceof Consumable) {
+            Consumable newConsumable = (Consumable) item;
+            for (Item i : slots) {
+                if (i instanceof Consumable) {
+                    Consumable existingConsumable = (Consumable) i;
+                    if (existingConsumable.getName().equals(newConsumable.getName())) {
+                        if (((Consumable) item).getConsumableCount() < 5) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
             if(slots.size() >= unlockedSlots){
             return false;
           } else if(getTotalWeight() + item.getWeight() > maxWeight) {
@@ -101,7 +118,7 @@ public class Inventory {
        if(addItemCheck(item)){
         slots.add(item);
         setTotalWeight((int) calculateTotalWeight());
-        msg = item + " added to inventory ";
+        msg = item.toString() + " added to inventory ";
        }
        else {
            msg = " not enough room or carry capacity to add item ";
@@ -110,8 +127,12 @@ public class Inventory {
     }
 
     public String showInventory(){
+        //For at kunne opdatere total weight så den passer til inventory
+        setTotalWeight((int) calculateTotalWeight());
+
+
         System.out.println("\n------Inventory------");
-        System.out.println("Coins: " + coins + "\nTotal Weight: " + totalWeight + "\nUnlocked Slots: " + unlockedSlots + "\n");
+        System.out.println("Coins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
 
         for (Item item : slots){
             if (item instanceof Weapon w){
@@ -127,7 +148,6 @@ public class Inventory {
         }
         return slots.toString();
     }
-
     public void clearItems(){
         slots.clear();
     }
