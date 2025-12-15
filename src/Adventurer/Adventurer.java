@@ -66,7 +66,7 @@ public Adventurer() {
                                     e.getMessage();
                                 }
                                 existing.increaseQuantity(1);
-                                inv.setTotalWeight((int) inv.calculateTotalWeight());
+                                inv.setTotalWeight(inv.calculateTotalWeight());
                                 return msg.append(existing.getName() + " stacked to " + existing.getConsumableCount());
                             }
                         }

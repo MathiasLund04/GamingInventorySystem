@@ -32,6 +32,12 @@ public class Menu {
                     if (inv != null) {
                         dbRepo.loadInventory(inv);
                         inv.showInventory();
+                        while (choice != 6){
+                            inventoryMenu();
+                            choice = getChoice(input);
+                            inventoryMenuChoices(inv, choice);
+
+                        }
                     } else {
                         System.out.println("no inventory loaded");
                     }
@@ -69,7 +75,7 @@ public class Menu {
                                 }
                                 if (dbDecremented) {
                                     c.setConsumableCount(c.getConsumableCount() - 1);
-                                    inv.setTotalWeight((int) inv.calculateTotalWeight());
+                                    inv.setTotalWeight(inv.calculateTotalWeight());
                                     System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
                                 } else {
                                     System.out.println("Failed to decrement consumable in database.");
@@ -110,6 +116,18 @@ public class Menu {
                     }
                 }
                 case 5 -> {
+                    while(inv.addSlots()){
+                        System.out.println("want to buy more space (+ 32 slots)\n" +
+                                " Yes(Y) or No(N)");
+                        String choice2 = input.nextLine();
+                        if (choice2.equals("Yes") || choice2.equals("Y")) {
+                            inv.setUnlockedSlots(inv.getUnlockedSlots() + 32);
+                        } else if (choice2.equals("No") || choice2.equals("N")) {
+                            break;
+                        }
+                    }
+                }
+                case 6 -> {
                     System.out.println("Thank you for playing!");
                     System.exit(0);
                 }
@@ -140,7 +158,7 @@ public class Menu {
                 Choice = scanner.nextInt();
                 break;
             } catch (InputMismatchException e) {
-                System.out.print("Invalid selection. Please enter a number between 1-4: ");
+                System.out.print("Invalid selection. Please enter a number between 1-5: ");
                 scanner.next();
             }
         }
@@ -150,7 +168,47 @@ public class Menu {
     public static void inventoryMenu(){
         System.out.println("1. Show inventory (Not sorted)");
         System.out.println("2. Show inventory (Sorted by choice)");
-        System.out.println("3. Delete item");
-        System.out.println("4. Back to menu");
+        System.out.println("3. Sell item");
+        System.out.println("4. Buy slots");
+        System.out.println("5. Back to menu");
+    }
+
+    public static void inventoryMenuChoices(Inventory inv, int choice){
+        switch (choice){
+            case 1 -> inv.showInventory();
+            case 2 -> {
+                System.out.println("NOT WORKING RIGHT NOW");
+                showChoices();
+                sortingChoice(inv, choice);
+            }
+            case 3 -> System.out.println("GET DELETE IN A METHOD");
+            case 4 -> System.out.println("BUY SLOTS (ALSO IN A METHOD)");
+            case 5 -> {
+                System.out.println("Going back to menu");
+                choice = 6;
+            }
+            default -> System.out.println("Invalid choice.");
+        }
+    }
+
+    public static void sortingChoice(Inventory inv, int choice){
+        switch (choice){
+            case 1 -> inv.showInventoryById();
+            case 2 -> inv.showInventory();
+            case 3 -> inv.showInventory();
+            case 4 -> inv.showInventory();
+            case 5 -> {
+                System.out.println("Going back to inventory menu");
+                choice = 6; //Working on it
+            }
+        }
+    }
+
+    public static void showChoices(){
+        System.out.println("1. Order by time added");
+        System.out.println("2. Order by item type");
+        System.out.println("3. Order by value");
+        System.out.println("4. Order by weight");
+        System.out.println("5. Back to inventory menu");
     }
 }

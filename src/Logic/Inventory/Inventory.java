@@ -40,8 +40,9 @@ public class Inventory {
         for (Item item : slots) {
             if (item instanceof Consumable) {
                 sum += (item.getWeight()*((Consumable) item).getConsumableCount());
+            } else {
+                sum += item.getWeight();
             }
-            sum += item.getWeight();
         }
         return sum;
     }
@@ -68,7 +69,7 @@ public class Inventory {
     public void setUnlockedSlots(int unlockedSlots) {
         this.unlockedSlots = unlockedSlots;
     }
-    public void setTotalWeight(int totalWeight) {
+    public void setTotalWeight(double totalWeight) {
         this.totalWeight = totalWeight;
     }
 
@@ -79,7 +80,7 @@ public class Inventory {
                 if (i instanceof Consumable) {
                     Consumable existingConsumable = (Consumable) i;
                     if (existingConsumable.getName().equals(newConsumable.getName())) {
-                        if (((Consumable) item).getConsumableCount() < 5) {
+                        if (existingConsumable.getConsumableCount() < 5) {
                             return true;
                         }
                     }
@@ -108,6 +109,7 @@ public class Inventory {
                    if (existingConsumable.getName().equals(newConsumable.getName())){
                        if(existingConsumable.getConsumableCount() < getMaxStack()) {
                            existingConsumable.increaseQuantity(1);
+                           setTotalWeight(calculateTotalWeight());
                            msg = existingConsumable.getName() + " stacked to " + existingConsumable.getConsumableCount();
                            return msg;
                        }
@@ -117,7 +119,7 @@ public class Inventory {
        }
        if(addItemCheck(item)){
         slots.add(item);
-        setTotalWeight((int) calculateTotalWeight());
+        setTotalWeight(calculateTotalWeight());
         msg = item.toString() + " added to inventory ";
        }
        else {
@@ -128,7 +130,7 @@ public class Inventory {
 
     public String showInventory(){
         //For at kunne opdatere total weight så den passer til inventory
-        setTotalWeight((int) calculateTotalWeight());
+        setTotalWeight(calculateTotalWeight());
 
 
         System.out.println("\n------Inventory------");
@@ -148,6 +150,7 @@ public class Inventory {
         }
         return slots.toString();
     }
+
     public void clearItems(){
         slots.clear();
     }
@@ -158,11 +161,53 @@ public class Inventory {
             Item item = it.next();
             if (item.getDbId() == dbId) {
                 it.remove();
-                setTotalWeight((int) calculateTotalWeight());
+                setTotalWeight(calculateTotalWeight());
                 return item;
             }
         }
         return null;
+    }
+
+    public StringBuilder showInventoryById(){
+        bubbleSortById();
+
+        StringBuilder msg = new StringBuilder("\n------Inventory------");
+        msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
+
+        for (Item item : slots){
+            msg.append(item).append("\n");
+        }
+        return msg;
+    }
+
+    public void bubbleSortById(){
+        int size = slots.size();
+        for (int i = 0; i < size; i++){
+            boolean swapped = false;
+
+            for (int j = 0; j < size - 1; j++){
+                if (slots.get(j).getDbId() > slots.get(j+1 ).getDbId()){
+                    Item temp = slots.get(j);
+                    slots.set(j, slots.get(j+1));
+                    slots.set(j + 1, temp);
+
+                    swapped = true;
+                }
+            }
+            if (!swapped){
+                break;
+            }
+        }
+    }
+
+
+
+    public boolean addSlots(){
+        if (coins<500){
+            return true;
+        } else{
+            return false;
+        }
     }
 
 
