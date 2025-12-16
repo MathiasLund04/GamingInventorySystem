@@ -8,6 +8,7 @@ import Items.Weapon;
 import Logic.DBConnection;
 import Logic.DBRepo;
 import Logic.Inventory.Inventory;
+import org.w3c.dom.ls.LSOutput;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
@@ -25,17 +26,20 @@ public class Menu {
             inv = dbRepo.loadInventory(inv);
             showMenu();
             choice = getChoice(input);
+            input.nextLine();
 
             switch (choice) {
                 case 1 -> System.out.println(adventurer.goOnAdventure());
                 case 2 -> {
                     if (inv != null) {
                         dbRepo.loadInventory(inv);
-                        inv.showInventory();
-                        while (choice != 6){
+                        System.out.println(inv.showInventory());
+
+                        while (choice != 5){
                             inventoryMenu();
                             choice = getChoice(input);
                             inventoryMenuChoices(inv, choice);
+
 
                         }
                     } else {
@@ -116,16 +120,19 @@ public class Menu {
                     }
                 }
                 case 5 -> {
-                    while(inv.addSlots()){
-                        System.out.println("want to buy more space (+ 32 slots)\n" +
-                                " Yes(Y) or No(N)");
+                    while(inv.addSlotsCheck()){
+                        System.out.println("want to buy more space (+ 32 slots)");
+                        System.out.println(" Yes(Y) or No(N)");
                         String choice2 = input.nextLine();
-                        if (choice2.equals("Yes") || choice2.equals("Y")) {
+                        if (choice2.equalsIgnoreCase("Yes") || choice2.equalsIgnoreCase("Y")) {
                             inv.setUnlockedSlots(inv.getUnlockedSlots() + 32);
-                        } else if (choice2.equals("No") || choice2.equals("N")) {
+                            inv.setCoins(inv.getCoins() - 300);
+                            break;
+                        } else if (choice2.equalsIgnoreCase("No") || choice2.equalsIgnoreCase("N")) {
                             break;
                         }
                     }
+
                 }
                 case 6 -> {
                     System.out.println("Thank you for playing!");
@@ -137,7 +144,7 @@ public class Menu {
 
             }
         }
-            while (choice != 5) ;
+            while (choice != 6) ;
             input.close();
 
     }
@@ -148,7 +155,9 @@ public class Menu {
         System.out.println("2. Look at your inventory");
         System.out.println("3. Test Connection");
         System.out.println("4. sell an item");
-        System.out.println("5. Close the game");
+        System.out.println("5. buy more space");
+        System.out.println("6. Close the game");
+
     }
 
     public static int getChoice (Scanner scanner) {
@@ -175,17 +184,19 @@ public class Menu {
 
     public static void inventoryMenuChoices(Inventory inv, int choice){
         switch (choice){
-            case 1 -> inv.showInventory();
+            case 1 -> System.out.println(inv.showInventory());
             case 2 -> {
-                System.out.println("NOT WORKING RIGHT NOW");
-                showChoices();
-                sortingChoice(inv, choice);
+                while (choice != 6) {
+                    showChoices();
+                    choice = getChoice(input);
+                    sortingChoice(inv, choice);
+                }
             }
-            case 3 -> System.out.println("GET DELETE IN A METHOD");
-            case 4 -> System.out.println("BUY SLOTS (ALSO IN A METHOD)");
+            case 3 -> System.out.println("WORKING ON IT!! GET DELETE IN A METHOD");
+            case 4 -> System.out.println("WORKING ON IT!! BUY SLOTS (ALSO IN A METHOD)");
             case 5 -> {
                 System.out.println("Going back to menu");
-                choice = 6;
+                //Working on it
             }
             default -> System.out.println("Invalid choice.");
         }
@@ -193,22 +204,48 @@ public class Menu {
 
     public static void sortingChoice(Inventory inv, int choice){
         switch (choice){
-            case 1 -> inv.showInventoryById();
-            case 2 -> inv.showInventory();
-            case 3 -> inv.showInventory();
-            case 4 -> inv.showInventory();
+            case 1 -> {
+                inv.bubbleSortById();
+                System.out.println(inv.showInventory());
+            }
+            case 2 -> {
+                inv.bubbleSortByNewest();
+                System.out.println(inv.showInventory());
+            }
+            case 3 -> {
+                priorities();
+                int typeChoice = getChoice(input);
+                inv.bubbleSortByType(typeChoice);
+                System.out.println(inv.showInventory());
+            }
+            case 4 -> {
+                inv.bubbleSortByValue();
+                System.out.println(inv.showInventory());
+            }
             case 5 -> {
+                inv.bubbleSortByWeight();
+                System.out.println(inv.showInventory());
+            }
+            case 6 -> {
                 System.out.println("Going back to inventory menu");
-                choice = 6; //Working on it
+                //Working on it
             }
         }
     }
 
     public static void showChoices(){
-        System.out.println("1. Order by time added");
-        System.out.println("2. Order by item type");
-        System.out.println("3. Order by value");
-        System.out.println("4. Order by weight");
-        System.out.println("5. Back to inventory menu");
+        System.out.println("1. Order by time added (Oldest first)");
+        System.out.println("2. Order by time added (Newest first)");
+        System.out.println("3. Order by item type");
+        System.out.println("4. Order by value");
+        System.out.println("5. Order by weight");
+        System.out.println("6. Back to inventory menu");
+    }
+
+    public static void priorities(){
+        System.out.println("1. Weapon first");
+        System.out.println("2. Armor first");
+        System.out.println("3. Consumable first");
+        System.out.print("Your choice: ");
     }
 }

@@ -6,10 +6,7 @@ import Items.Item;
 import Items.Weapon;
 import Logic.DBRepo;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 public class Inventory {
     Random rand = new Random();
@@ -44,7 +41,9 @@ public class Inventory {
                 sum += item.getWeight();
             }
         }
-        return sum;
+        double rounded = Math.round(sum*10.0)/10.0;
+
+        return rounded;
     }
 
     public int getCoins() {
@@ -128,27 +127,25 @@ public class Inventory {
        return msg;
     }
 
-    public String showInventory(){
+    public StringBuilder showInventory(){
         //For at kunne opdatere total weight så den passer til inventory
         setTotalWeight(calculateTotalWeight());
 
 
-        System.out.println("\n------Inventory------");
-        System.out.println("Coins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
+        StringBuilder msg = new StringBuilder("\n------Inventory------");
+        msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
 
         for (Item item : slots){
-            if (item instanceof Weapon w){
-                System.out.printf(" %d | %s | %s | %s | %.1f | %d | %d%n",w.getDbId(), w.getName() , w.getType(), w.getRarity(), w.getWeight(), w.getValue(), w.getDamage());
-            } else if (item instanceof Armor a){
-                System.out.printf(" %d | %s | %s | %.1f | %d | %d%n",a.getDbId(), a.getName(), a.getRarity(), a.getWeight(), a.getValue(), a.getDurability());
-            } else if (item instanceof Consumable c){
-                System.out.printf("%d | %s | %.1f | %d | %s | %d/%d%n",c.getDbId(), c.getName(), c.getWeight(), c.getValue(), c.getDescription(), c.getConsumableCount(), getMaxStack());
+            msg.append(item).append("\n");
+
+            if (slots.isEmpty()){
+                return msg.append("Inventory is empty");
             }
+
         }
-        if (slots.isEmpty()){
-            return "Inventory is empty";
-        }
-        return slots.toString();
+        return msg;
+
+
     }
 
     public void clearItems(){
@@ -168,17 +165,7 @@ public class Inventory {
         return null;
     }
 
-    public StringBuilder showInventoryById(){
-        bubbleSortById();
 
-        StringBuilder msg = new StringBuilder("\n------Inventory------");
-        msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
-
-        for (Item item : slots){
-            msg.append(item).append("\n");
-        }
-        return msg;
-    }
 
     public void bubbleSortById(){
         int size = slots.size();
@@ -200,14 +187,112 @@ public class Inventory {
         }
     }
 
+    public void bubbleSortByNewest(){
+        int size = slots.size();
+        for (int i = 0; i < size; i++){
+            boolean swapped = false;
+            for (int j = 0; j < size - 1; j++){
+                if (slots.get(j).getDbId() < slots.get(j+1).getDbId()){
+                    Item temp = slots.get(j);
+                    slots.set(j, slots.get(j+1));
+                    slots.set(j + 1, temp);
+
+                    swapped = true;
+                }
+            }
+            if (!swapped){
+                break;
+            }
+        }
+    }
+
+    public void bubbleSortByValue(){
+        int size = slots.size();
+        for (int i = 0; i < size; i++){
+            boolean swapped = false;
+
+            for (int j = 0; j < size - 1; j++){
+                if (slots.get(j).getValue() > slots.get(j+1).getValue()){
+                    Item temp = slots.get(j);
+                    slots.set(j, slots.get(j+1));
+                    slots.set(j + 1, temp);
+                    
+                    swapped = true;
+                }
+            }
+            if (!swapped){
+                break;
+            }
+        }
+    }
+
+    public void bubbleSortByWeight(){
+        int size = slots.size();
+        for (int i = 0; i < size; i++){
+            boolean swapped = false;
+            for (int j = 0; j < size - 1; j++){
+                if (slots.get(j).getWeight() > slots.get(j+1).getWeight()){
+                    Item temp = slots.get(j);
+                    slots.set(j, slots.get(j+1));
+                    slots.set(j + 1, temp);
+
+                    swapped = true;
+                }
+            }
+            if (!swapped){
+                break;
+            }
+        }
+    }
+
+    public void bubbleSortByType(int typePriority){
+        int size = slots.size();
+        for (int i = 0; i < size; i++){
+            boolean swapped = false;
+            for (int j = 0; j < size - 1; j++){
+                int p1 = getTypePriority(slots.get(j), typePriority);
+                int p2 = getTypePriority(slots.get(j+1), typePriority);
+
+                if (p1 > p2){
+                    Item temp = slots.get(j);
+                    slots.set(j, slots.get(j+1));
+                    slots.set(j + 1, temp);
+
+                    swapped = true;
+                }
+            }
+            if (!swapped){
+                break;
+            }
+        }
+
+    }
 
 
-    public boolean addSlots(){
-        if (coins<500){
+
+
+    public boolean addSlotsCheck(){
+        if (coins>300){
             return true;
         } else{
             return false;
         }
+    }
+
+    //Brugerdefineret prioritet ud fra hvad de vil have skal være først
+    private int getTypePriority(Item item, int typePriority){
+
+    if (typePriority == 1 && item instanceof Weapon)return 1;
+    if (typePriority == 2 && item instanceof Armor) return 1;
+    if (typePriority == 3 && item instanceof Consumable)return 1;
+
+    if (item instanceof Weapon) return 2;
+    if (item instanceof Armor) return 3;
+    if (item instanceof Consumable) return 4;
+
+    //Hvis ikke den er weapon, armor eller consumable, returneres dette (Kun hvis der er en eller anden form for gejl i den undtastede paraneter)
+    return Integer.MAX_VALUE;
+
     }
 
 
