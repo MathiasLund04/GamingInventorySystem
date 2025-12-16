@@ -164,7 +164,7 @@ public class Inventory {
     }
 
     public StringBuilder showArmor(){
-        StringBuilder msg = new StringBuilder("\n------Weapons------");
+        StringBuilder msg = new StringBuilder("\n------Armor------");
         for (Item item : slots){
             if (item instanceof Armor){
                 msg.append("------\n");
@@ -175,7 +175,7 @@ public class Inventory {
     }
 
     public StringBuilder showConsumable(){
-        StringBuilder msg = new StringBuilder("\n------Weapons------");
+        StringBuilder msg = new StringBuilder("\n------Consumables------");
         for (Item item : slots){
             if (item instanceof Consumable){
                 msg.append("------\n");

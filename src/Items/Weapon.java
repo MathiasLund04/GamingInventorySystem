@@ -6,9 +6,9 @@ import Enums.WeaponType;
 
 public class Weapon extends Item {
     private int damage;
-    WeaponType type;
-    WeaponHandleType handleType;
-    Rarity rarity;
+    private WeaponType type;
+    private WeaponHandleType handleType;
+    private Rarity rarity;
 
     public Weapon (String name, WeaponType type, Rarity rarity, double weight, int value, int damage, WeaponHandleType handleType) {
         super(name, weight, value);

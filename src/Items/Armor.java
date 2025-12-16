@@ -5,8 +5,8 @@ import Enums.Rarity;
 
 public class Armor extends Item {
     private int durability;
-    ArmorPlacement armorPlacement;
-    Rarity rarity;
+    private ArmorPlacement armorPlacement;
+    private Rarity rarity;
 
     public Armor(String name, Rarity rarity, double weight, int value, int durability, ArmorPlacement armorPlacement) {
         super(name, weight, value);
@@ -23,16 +23,6 @@ public class Armor extends Item {
     }
     public ArmorPlacement getArmorPlacement() {
         return armorPlacement;
-    }
-
-    public void setDurability(int durability) {
-        this.durability = durability;
-    }
-    public void setRarity(Rarity rarity) {
-        this.rarity = rarity;
-    }
-    public void setArmorPlacement(ArmorPlacement armorPlacement) {
-        this.armorPlacement = armorPlacement;
     }
 
     @Override

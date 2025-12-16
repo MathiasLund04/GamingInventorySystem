@@ -5,7 +5,7 @@ import Logic.Inventory.Inventory;
 
 public class Consumable extends Item {
     private String description;
-    ConsumableType consumableType;
+    private ConsumableType consumableType;
     private int consumableCount;
 
     public Consumable(String name, double weight, int value, String description, ConsumableType consumableType) {

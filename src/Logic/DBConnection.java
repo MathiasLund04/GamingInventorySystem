@@ -10,7 +10,8 @@ public class DBConnection {
     private static final String PASS= "Pande.Kage.04";
 
     public Connection get() throws Exception{
-    return DriverManager.getConnection(URL,USER,PASS);}
+    return DriverManager.getConnection(URL,USER,PASS);
+    }
 
 
 }
