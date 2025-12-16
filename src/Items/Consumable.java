@@ -7,6 +7,7 @@ public class Consumable extends Item {
     private String description;
     private ConsumableType consumableType;
     private int consumableCount;
+    private Inventory inv;
 
     public Consumable(String name, double weight, int value, String description, ConsumableType consumableType) {
         super(name, weight, value);
@@ -43,8 +44,8 @@ public class Consumable extends Item {
     @Override
     public String toString() {
         return String.format(
-                "%-4s | %-12s | %-8s | %-8s | %-20s | %-22s | %-15s%n" +
-                        "%-4d | %-12s | %-8.1f | %-8d | %-20s | %-22s | %-7d/%-7d%n",
+                "%-4s | %-20s | %-8s | %-8s | %-20s | %-22s | %-15s%n" +
+                        "%-4d | %-20s | %-8.1f | %-8d | %-20s | %-22s | %-1d/%-1d%n",
                 "Id", "Name", "Weight", "Value", "Description", "Type of Consumable", "Stack count",
                 getDbId(), getName(), getWeight(), getValue(),
                 getDescription(), getConsumableType(),

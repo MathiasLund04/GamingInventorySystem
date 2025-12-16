@@ -8,12 +8,14 @@ import Items.Item;
 import Items.Weapon;
 import Logic.DBConnection;
 import Logic.DBRepo;
+import Logic.GameLogic;
 import Logic.Inventory.Inventory;
 
 public class Adventurer {
     private DBConnection db;
     private DBRepo dbRepo;
     private Inventory inv;
+    private GameLogic gl;
 
 
     public Adventurer(Inventory inventory, DBRepo dbRepo) {
@@ -41,13 +43,13 @@ public class Adventurer {
         Item item = gen.item;
 
         int newId = -1;
-        if (inv.addItemCheck(item)) {
+        if (gl.addItemCheck(item)) {
             if (item instanceof Consumable) {
                 for (Item i : inv.getSlots()) {
                     if (i instanceof Consumable) {
                         Consumable existing = (Consumable) i;
                         if (existing.getName().equals(item.getName())) {
-                            if (existing.getConsumableCount() < Inventory.getMaxStack()) {
+                            if (existing.getConsumableCount() < inv.getMaxStack()) {
                                 try {
                                     int hasId = dbRepo.insertConsumable(1, gen.templateId);
                                     if (hasId > 0) {
@@ -57,13 +59,13 @@ public class Adventurer {
                                     e.getMessage();
                                 }
                                 existing.increaseQuantity(1);
-                                inv.setTotalWeight(inv.calculateTotalWeight());
+                                inv.setTotalWeight(gl.calculateTotalWeight());
                                 return msg.append(existing.getName() + " stacked to " + existing.getConsumableCount());
                             }
                         }
                     }
                 }
-                if (!inv.addItemCheck(item)) {
+                if (!gl.addItemCheck(item)) {
                     msg.append(item);
                     msg.append("\nNot enough Room or carry capacity to add this item.\n");
                     return msg;
@@ -73,7 +75,7 @@ public class Adventurer {
                     item.setDbId(newId);
                 }
                 try {
-                    msg.append(inv.addItem(item));
+                    msg.append(gl.addItem(item));
                 }catch (NotEnoughInventorySpaceException e){
                     msg.append("Could not add ").append(item.getName()).append(": not enough inventory space.\n");
                 } catch (TooMuchWeightException e) {
@@ -85,7 +87,7 @@ public class Adventurer {
 
 
             // checker hvis item er conumable og allerade er der, så stacker den
-            if (!inv.addItemCheck(item)) {
+            if (!gl.addItemCheck(item)) {
                 msg.append(item);
                 msg.append("Not enough room or carry capacity to add item");
                 return msg;
@@ -100,7 +102,7 @@ public class Adventurer {
             item.setDbId(newId);
         }
         try {
-            msg.append(inv.addItem(item));
+            msg.append(gl.addItem(item));
         }catch (NotEnoughInventorySpaceException e){
             msg.append("Could not add ").append(item.getName()).append(": not enough inventory space.\n");
         } catch (TooMuchWeightException e) {

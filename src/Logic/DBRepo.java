@@ -5,20 +5,16 @@ import Enums.WeaponHandleType;
 import Enums.WeaponType;
 import Enums.ArmorPlacement;
 import Enums.ConsumableType;
-import Exceptions.NotEnoughInventorySpaceException;
-import Exceptions.TooMuchWeightException;
 import Items.Armor;
 import Items.Item;
 import Items.Weapon;
 import Items.Consumable;
 import Logic.Inventory.Inventory;
-
-
 import java.sql.*;
-import java.util.List;
 
 public class DBRepo {
     private final DBConnection db;
+    private Inventory inv;
     public DBRepo(DBConnection db) {
         this.db = db;
     }
@@ -50,7 +46,7 @@ public class DBRepo {
     }
 
     //Metode til at hente inventory fra DB
-    public Inventory loadInventory(Inventory inventory) throws Exception {
+    public Inventory loadInventory(Inventory inventory,GameLogic gameLogic) throws Exception {
 
 
         try (Connection conn = db.get()){
@@ -71,7 +67,7 @@ public class DBRepo {
                 }
             }
 
-            inventory.clearItems();
+            gameLogic.clearItems();
 
             //Weapons (Ændrer String-navnet for at vise hvilken query der hører til hvilket item)
             String sqlWeapons = "SELECT w.name, w.weaponType, w.rarity, w.weight, w.valuee, w.damage, w.handleType, hw.id AS hw_id " +
@@ -93,7 +89,7 @@ public class DBRepo {
 
 
                     w.setDbId(rs.getInt("hw_id")); //Dette bruges til at kunne blande items så det ikke kun er sat efter Weapon, Armor og Consumable
-                    inventory.addItem(w);
+                    gameLogic.addItem(w);
                 }
             }
 
@@ -114,7 +110,7 @@ public class DBRepo {
                             ArmorPlacement.valueOf(rs.getString("armorPlacement"))
                     );
                     a.setDbId(rs.getInt("ha_id"));
-                    inventory.addItem(a);
+                    gameLogic.addItem(a);
                 }
             }
 
@@ -135,7 +131,7 @@ public class DBRepo {
                     );
                     c.setDbId(rs.getInt("hc_id"));
                     c.setConsumableCount(rs.getInt("quantity"));
-                    inventory.addItem(c);
+                    gameLogic.addItem(c);
                 }
 
 
@@ -230,7 +226,7 @@ public class DBRepo {
             try (PreparedStatement ps = c.prepareStatement(updateSql)) {
                 ps.setInt(1, invId);
                 ps.setInt(2, consumableId);
-                ps.setInt(3, Inventory.getMaxStack());
+                ps.setInt(3, inv.getMaxStack());
                 int updated = ps.executeUpdate();
                 if (updated > 0) {
                     String selectSql = "SELECT id FROM Hasitem WHERE inventoryId = ? AND consumableId = ?";
@@ -292,8 +288,6 @@ public class DBRepo {
         }
         return -1;
     }
-
-
     public boolean deleteWeapon(int hasId) throws Exception {
         String sql = "DELETE FROM hasitem WHERE id = ?";
         try (Connection c = db.get();
@@ -330,7 +324,6 @@ public class DBRepo {
             }
         }
     }
-
     public void updateCoins(int coins) throws Exception {
         String sql = "UPDATE Inventory SET coins = ? WHERE inventoryId = 1;";
 
@@ -342,7 +335,6 @@ public class DBRepo {
             e.printStackTrace();
         }
     }
-
     public void updateUnlockedSlots(int unlockedSlots) throws Exception {
         String sql = "UPDATE Inventory SET unlockedSlots = ? WHERE inventoryId = 1;";
 

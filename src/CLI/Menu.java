@@ -8,9 +8,8 @@ import Items.Item;
 import Items.Weapon;
 import Logic.DBConnection;
 import Logic.DBRepo;
+import Logic.GameLogic;
 import Logic.Inventory.Inventory;
-import org.w3c.dom.ls.LSOutput;
-
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -20,11 +19,12 @@ public class Menu {
         private static DBRepo dbRepo = new DBRepo(db);
         private static Inventory inv = new Inventory(0,  32, 0);
         private static Adventurer adventurer = new Adventurer(inv, dbRepo);
+        private static GameLogic gl = new GameLogic(inv);
     public static void startMenu() throws Exception {
         int choice;
 
         do {
-            inv = dbRepo.loadInventory(inv);
+            inv = dbRepo.loadInventory(inv,gl);
             showMenu();
             choice = getChoice(input);
             input.nextLine();
@@ -36,15 +36,10 @@ public class Menu {
                 }
                 case 2 -> {
                     if (inv != null) {
-                        dbRepo.loadInventory(inv);
-                        System.out.println(inv.showInventory());
-
                         while (choice != 5){
                             inventoryMenu();
                             choice = getChoice(input);
                             inventoryMenuChoices(inv, choice);
-
-
                         }
                     } else {
                         System.out.println("no inventory loaded");
@@ -83,7 +78,7 @@ public class Menu {
                 Choice = scanner.nextInt();
                 break;
             } catch (InputMismatchException e) {
-                System.out.print("Invalid selection. Please enter a number between 1-5: ");
+                System.out.print("Invalid selection. Please enter a number between 1-7: ");
                 scanner.next();
             }
         }
@@ -113,21 +108,21 @@ public class Menu {
     }
 
     public static void inventoryMenuChoices(Inventory inv, int choice) throws Exception {
-        dbRepo.loadInventory(inv);
+        dbRepo.loadInventory(inv,gl);
         switch (choice){
-            case 1 -> System.out.println(inv.showInventory());
+            case 1 -> System.out.println(gl.showInventory());
             case 2 -> {
                 while (choice != 7) {
                     showChoices();
                     choice = getChoice(input);
-                    sortingChoice(inv, choice);
+                    sortingChoice(gl, choice);
                 }
             }
             case 3 -> {
                 try {
-                    dbRepo.loadInventory(inv);
+                    dbRepo.loadInventory(inv,gl);
                     System.out.println("Current inventory:");
-                    inv.showInventory();
+                    gl.showInventory();
                     System.out.print("Enter the Id of the item to delete: ");
                     int deleteID = input.nextInt();
                     input.nextLine();
@@ -154,7 +149,7 @@ public class Menu {
                             }
                             if (dbDecremented) {
                                 c.setConsumableCount(c.getConsumableCount() - 1);
-                                inv.setTotalWeight(inv.calculateTotalWeight());
+                                inv.setTotalWeight(gl.calculateTotalWeight());
                                 System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
                             } else {
                                 System.out.println("Failed to decrement consumable in database.");
@@ -183,7 +178,7 @@ public class Menu {
                                 dbRepo.updateCoins(inv.getCoins());
                             }
                         }
-                        inv.removeItemByDbId(deleteID);
+                        gl.removeItemByDbId(deleteID);
                         System.out.println("Item removed successfully.");
                     } else {
                         System.out.println("Failed to remove item from database. Item not removed.");
@@ -199,7 +194,7 @@ public class Menu {
                         int price = 300;
                     try {
                         coinsCheck(inv.getCoins(), price);
-                        while(inv.addSlotsCheck()){
+                        while(gl.addSlotsCheck()){
                             input.nextLine();
                             System.out.println("want to buy more space (+ 32 slots) for 300 coins");
                             System.out.println(" Yes(Y) or No(N)");
@@ -224,35 +219,34 @@ public class Menu {
         }
     }
 
-    public static void sortingChoice(Inventory inv, int choice){
+    public static void sortingChoice(GameLogic gl, int choice){
         switch (choice){
             case 1 -> {
-                inv.bubbleSortById();
-                System.out.println(inv.showInventory());
+                Menu.gl.bubbleSortById();
+                System.out.println(gl.showInventory());
             }
             case 2 -> {
-                inv.bubbleSortByNewest();
-                System.out.println(inv.showInventory());
+                gl.bubbleSortByNewest();
+                System.out.println(gl.showInventory());
             }
             case 3 -> {
                 priorities();
                 int typeChoice = getChoice(input);
-                inv.bubbleSortByType(typeChoice);
-                System.out.println(inv.showInventory());
+                gl.bubbleSortByType(typeChoice);
+                System.out.println(gl.showInventory());
             }
             case 4 -> {
-                inv.bubbleSortByValue();
-                System.out.println(inv.showInventory());
+                gl.bubbleSortByValue();
+                System.out.println(gl.showInventory());
             }
             case 5 -> {
-                inv.bubbleSortByWeight();
-                System.out.println(inv.showInventory());
+                gl.bubbleSortByWeight();
+                System.out.println(gl.showInventory());
             }
             case 6 -> {
                 itemType();
                 int choice5 = getChoice(input);
                 itemChoice(choice5);
-                System.out.println(inv.showInventory());
             }
             case 7 -> {
                 System.out.println("Going back to inventory menu\n");
@@ -286,9 +280,9 @@ public class Menu {
 
     public static void itemChoice(int choice){
         switch (choice){
-            case 1 -> System.out.println(inv.showWeapons());
-            case 2 -> System.out.println(inv.showArmor());
-            case 3 -> System.out.println(inv.showConsumable());
+            case 1 -> System.out.println(gl.showWeapons());
+            case 2 -> System.out.println(gl.showArmor());
+            case 3 -> System.out.println(gl.showConsumable());
         }
     }
 
