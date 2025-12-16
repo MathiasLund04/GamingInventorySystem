@@ -212,11 +212,10 @@ public class DBRepo {
             ps.setInt(1, invId);
             ps.setInt(2, weaponId);
             ps.executeUpdate();
-            System.out.println("Item added");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     int newId = keys.getInt(1);
-                    System.out.println("Indsat id = " + newId);
+
                     return newId;
                 }
             } catch (SQLException e) {
@@ -285,7 +284,6 @@ public class DBRepo {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 if (keys.next()) {
                     int newId = keys.getInt(1);
-                    System.out.println("Indsat id = " + newId);
                     return newId;
                 }
             } catch (SQLException e){

@@ -23,7 +23,7 @@ public class Inventory {
     private final List<Item> slots;
 
 
-    public Inventory(int coins, int maxPotionStack, int maxSlots, int unlockedSlots, int maxWeight, int maxStack, double totalWeight) {
+    public Inventory(int coins, int unlockedSlots, double totalWeight) {
         this.coins = coins;
         this.unlockedSlots = unlockedSlots;
         this.totalWeight = totalWeight;
@@ -43,6 +43,7 @@ public class Inventory {
                 sum += item.getWeight();
             }
         }
+        //For at give tallet en decimal så det ser mere overskueligt ud
         double rounded = Math.round(sum*10.0)/10.0;
 
         return rounded;
@@ -97,7 +98,7 @@ public class Inventory {
         }
 
     }
-    public String addItem(Item item) {
+    public String addItem(Item item) throws NotEnoughInventorySpaceException, TooMuchWeightException {
        String msg = " ";
 
        //Hvis det er en Consumable så vil den kunne stacke med dette
@@ -124,8 +125,10 @@ public class Inventory {
         setTotalWeight(calculateTotalWeight());
         msg = item.toString() + " added to inventory ";
        }
-       else {
-           msg = " not enough room or carry capacity to add item ";
+       else if (slots.size() >= unlockedSlots){
+           throw new NotEnoughInventorySpaceException("Not enough inventory slots to add the item: " + item.getName());
+       } else if (getTotalWeight() + item.getWeight() > maxWeight) {
+           throw new TooMuchWeightException("Adding " + item.getName() + " would exceed carry capacity.");
        }
        return msg;
     }
@@ -134,9 +137,8 @@ public class Inventory {
         //For at kunne opdatere total weight så den passer til inventory
         setTotalWeight(calculateTotalWeight());
 
-
         StringBuilder msg = new StringBuilder("\n------Inventory------");
-        msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
+        msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "/" + getMaxSlots() + "\n");
 
         for (Item item : slots){
             msg.append("------\n");
@@ -145,13 +147,42 @@ public class Inventory {
             if (slots.isEmpty()){
                 return msg.append("Inventory is empty");
             }
-
         }
-        
         msg.append("------------------------");
         return msg;
+    }
 
+    public StringBuilder showWeapons(){
+        StringBuilder msg = new StringBuilder("\n------Weapons------");
+        for (Item item : slots){
+            if (item instanceof Weapon){
+                msg.append("------\n");
+                msg.append(item).append("\n");
+            }
+        }
+        return msg;
+    }
 
+    public StringBuilder showArmor(){
+        StringBuilder msg = new StringBuilder("\n------Weapons------");
+        for (Item item : slots){
+            if (item instanceof Armor){
+                msg.append("------\n");
+                msg.append(item).append("\n");
+            }
+        }
+        return msg;
+    }
+
+    public StringBuilder showConsumable(){
+        StringBuilder msg = new StringBuilder("\n------Weapons------");
+        for (Item item : slots){
+            if (item instanceof Consumable){
+                msg.append("------\n");
+                msg.append(item).append("\n");
+            }
+        }
+        return msg;
     }
 
     public void clearItems(){
@@ -170,7 +201,6 @@ public class Inventory {
         }
         return null;
     }
-
 
 //Sortering
     public void bubbleSortById(){
@@ -273,8 +303,6 @@ public class Inventory {
         }
 
     }
-
-
 
 
     public boolean addSlotsCheck(){

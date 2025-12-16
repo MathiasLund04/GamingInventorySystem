@@ -18,7 +18,7 @@ public class Menu {
         private static Scanner input = new Scanner(System.in);
         private static DBConnection db = new DBConnection();
         private static DBRepo dbRepo = new DBRepo(db);
-        private static Inventory inv = new Inventory(0, 5, 192, 32, 50, 20, 0);
+        private static Inventory inv = new Inventory(0,  32, 0);
         private static Adventurer adventurer = new Adventurer(inv, dbRepo);
     public static void startMenu() throws Exception {
         int choice;
@@ -30,7 +30,10 @@ public class Menu {
             input.nextLine();
 
             switch (choice) {
-                case 1 -> System.out.println(adventurer.goOnAdventure());
+                case 1 -> {
+                    System.out.println(adventurer.goOnAdventure());
+                    continueAdventure();
+                }
                 case 2 -> {
                     if (inv != null) {
                         dbRepo.loadInventory(inv);
@@ -87,6 +90,20 @@ public class Menu {
         return Choice;
     }
 
+    public static void continueAdventure() throws Exception{
+        boolean going = true;
+        while (going) {
+            System.out.println("Do you want to continue?");
+            System.out.println("Yes(Y) or No(N)");
+            String adventureChoice = input.nextLine();
+            if (adventureChoice.equalsIgnoreCase("Yes") || adventureChoice.equalsIgnoreCase("Y")) {
+                System.out.println(adventurer.goOnAdventure());
+            } else if (adventureChoice.equalsIgnoreCase("No") || adventureChoice.equalsIgnoreCase("N")) {
+                going = false;
+            }
+        }
+    }
+
     public static void inventoryMenu(){
         System.out.println("1. Show inventory (Not sorted)");
         System.out.println("2. Show inventory (Sorted by choice)");
@@ -100,7 +117,7 @@ public class Menu {
         switch (choice){
             case 1 -> System.out.println(inv.showInventory());
             case 2 -> {
-                while (choice != 6) {
+                while (choice != 7) {
                     showChoices();
                     choice = getChoice(input);
                     sortingChoice(inv, choice);
@@ -184,7 +201,7 @@ public class Menu {
                         coinsCheck(inv.getCoins(), price);
                         while(inv.addSlotsCheck()){
                             input.nextLine();
-                            System.out.println("want to buy more space (+ 32 slots)");
+                            System.out.println("want to buy more space (+ 32 slots) for 300 coins");
                             System.out.println(" Yes(Y) or No(N)");
                             String choice2 = input.nextLine();
                             if (choice2.equalsIgnoreCase("Yes") || choice2.equalsIgnoreCase("Y")) {
@@ -232,6 +249,12 @@ public class Menu {
                 System.out.println(inv.showInventory());
             }
             case 6 -> {
+                itemType();
+                int choice5 = getChoice(input);
+                itemChoice(choice5);
+                System.out.println(inv.showInventory());
+            }
+            case 7 -> {
                 System.out.println("Going back to inventory menu\n");
             }
         }
@@ -243,7 +266,8 @@ public class Menu {
         System.out.println("3. Order by item type");
         System.out.println("4. Order by value");
         System.out.println("5. Order by weight");
-        System.out.println("6. Back to inventory menu");
+        System.out.println("6. Select item type");
+        System.out.println("7. Back to inventory menu");
     }
 
     public static void priorities(){
@@ -251,6 +275,21 @@ public class Menu {
         System.out.println("2. Armor first");
         System.out.println("3. Consumable first");
         System.out.print("Your choice: ");
+    }
+
+    public static void itemType(){
+        System.out.println("1. Weapons");
+        System.out.println("2. Armor");
+        System.out.println("3. Consumables");
+        System.out.print("Your choice: ");
+    }
+
+    public static void itemChoice(int choice){
+        switch (choice){
+            case 1 -> System.out.println(inv.showWeapons());
+            case 2 -> System.out.println(inv.showArmor());
+            case 3 -> System.out.println(inv.showConsumable());
+        }
     }
 
     public static void coinsCheck(int amount,int price) throws NotEnoughCoinsException {

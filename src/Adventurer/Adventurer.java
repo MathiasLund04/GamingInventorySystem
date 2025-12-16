@@ -1,35 +1,26 @@
 package Adventurer;
 
+import Exceptions.NotEnoughInventorySpaceException;
+import Exceptions.TooMuchWeightException;
 import Items.Armor;
 import Items.Consumable;
 import Items.Item;
 import Items.Weapon;
 import Logic.DBConnection;
 import Logic.DBRepo;
-import Logic.GameLogic;
 import Logic.Inventory.Inventory;
 
 public class Adventurer {
     private DBConnection db;
     private DBRepo dbRepo;
     private Inventory inv;
-    private GameLogic gameLogic;
 
-public Adventurer() {
-    this.db = new DBConnection();
-    this.dbRepo = new DBRepo(db);
-    this.inv = new Inventory(0,16,192,32,50,32, 0);
-    this.gameLogic = new GameLogic(inv, dbRepo);
-
-}
 
     public Adventurer(Inventory inventory, DBRepo dbRepo) {
         this.db = new DBConnection();
         this.dbRepo = dbRepo != null ? dbRepo : new DBRepo(db);
-        this.inv = inventory != null ? inventory : new Inventory(0,16,192,32,50,32, 0);
-        this.gameLogic = new GameLogic(inv, this.dbRepo);
+        this.inv = inventory != null ? inventory : new Inventory(0,32,0);
     }
-
     public StringBuilder goOnAdventure() throws Exception {
         StringBuilder msg = new StringBuilder();
         int addedCoins = generateCoins();
@@ -81,7 +72,13 @@ public Adventurer() {
                 if (newId > 0) {
                     item.setDbId(newId);
                 }
-                msg.append(inv.addItem(item));
+                try {
+                    msg.append(inv.addItem(item));
+                }catch (NotEnoughInventorySpaceException e){
+                    msg.append("Could not add ").append(item.getName()).append(": not enough inventory space.\n");
+                } catch (TooMuchWeightException e) {
+                    msg.append("Could not add ").append(item.getName()).append(": carrying too much weight already.\n");
+                }
                 return msg;
             }
         }
@@ -102,16 +99,17 @@ public Adventurer() {
         if (newId > 0) {
             item.setDbId(newId);
         }
-        msg.append(inv.addItem(item));
-
+        try {
+            msg.append(inv.addItem(item));
+        }catch (NotEnoughInventorySpaceException e){
+            msg.append("Could not add ").append(item.getName()).append(": not enough inventory space.\n");
+        } catch (TooMuchWeightException e) {
+            msg.append("Could not add ").append(item.getName()).append(": carrying too much weight already.\n");
+        }
         return msg;
     }
-
-
     public int generateCoins(){
         int rand = (int)(Math.random() * 10) + 1;
         return rand;
     }
-
-
 }
