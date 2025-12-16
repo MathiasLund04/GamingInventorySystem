@@ -1,6 +1,7 @@
 package CLI;
 
 import Adventurer.Adventurer;
+import Exceptions.NotEnoughCoinsException;
 import Items.Armor;
 import Items.Consumable;
 import Items.Item;
@@ -14,13 +15,13 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Menu {
-        static Scanner input = new Scanner(System.in);
+        private static Scanner input = new Scanner(System.in);
+        private static DBConnection db = new DBConnection();
+        private static DBRepo dbRepo = new DBRepo(db);
+        private static Inventory inv = new Inventory(0, 5, 192, 32, 50, 20, 0);
+        private static Adventurer adventurer = new Adventurer(inv, dbRepo);
     public static void startMenu() throws Exception {
         int choice;
-        DBConnection db = new DBConnection();
-        DBRepo dbRepo = new DBRepo(db);
-        Inventory inv = new Inventory(0, 5, 192, 32, 50, 20, 0);
-        Adventurer adventurer = new Adventurer(inv, dbRepo);
 
         do {
             inv = dbRepo.loadInventory(inv);
@@ -49,92 +50,6 @@ public class Menu {
                 }
                 case 3 -> dbRepo.testConnection();
                 case 4 -> {
-                    try {
-                        dbRepo.loadInventory(inv);
-                        System.out.println("Current inventory:");
-                        inv.showInventory();
-                        System.out.print("Enter the Id of the item to delete: ");
-                        int deleteID = input.nextInt();
-                        input.nextLine();
-                        Item found = null;
-                        for (Item it : inv.getSlots()) {
-                            if (it.getDbId() == deleteID) {
-                                found = it;
-                                break;
-                            }
-                        }
-                        if (found == null) {
-                            System.out.println("Item with Id " + deleteID + " not found in inventory.");
-                            break;
-                        }
-
-                        if (found instanceof Consumable) {
-                            Consumable c = (Consumable) found;
-                            if (c.getConsumableCount() > 1) {
-                                boolean dbDecremented = false;
-                                try {
-                                    dbDecremented = dbRepo.deleteConsumable(c.getDbId());
-                                } catch (Exception e) {
-                                    System.out.println("Error decrementing consumable in DB: " + e.getMessage());
-                                }
-                                if (dbDecremented) {
-                                    c.setConsumableCount(c.getConsumableCount() - 1);
-                                    inv.setTotalWeight(inv.calculateTotalWeight());
-                                    System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
-                                } else {
-                                    System.out.println("Failed to decrement consumable in database.");
-                                }
-                                break;
-                            }
-                        }
-                        boolean dbDeleted = false;
-                        try {
-                            if (found instanceof Weapon) {
-                                dbDeleted = dbRepo.deleteWeapon(deleteID);
-                            } else if (found instanceof Armor) {
-                                dbDeleted = dbRepo.deleteArmor(deleteID);
-                            } else if (found instanceof Consumable) {
-                                dbDeleted = dbRepo.deleteConsumable(deleteID);
-                            }
-                        } catch (Exception e) {
-                            System.out.println("Error deleting item from database: " + e.getMessage());
-                        }
-
-                        if (dbDeleted) {
-                            for (Item it : inv.getSlots()) {
-                                if (it.getDbId() == deleteID) {
-                                    int addingCoins = it.getValue();
-                                    inv.setCoins(inv.getCoins() + addingCoins);
-                                    dbRepo.updateCoins(inv.getCoins());
-                                }
-                            }
-                            inv.removeItemByDbId(deleteID);
-                            System.out.println("Item removed successfully.");
-                        } else {
-                            System.out.println("Failed to remove item from database. Item not removed.");
-                        }
-                    } catch (Exception e) {
-                        System.out.println("Error while deleting item: " + e.getMessage());
-                        input.nextLine();
-
-                    }
-                }
-                case 5 -> {
-                    while(inv.addSlotsCheck()){
-                        System.out.println("want to buy more space (+ 32 slots)");
-                        System.out.println(" Yes(Y) or No(N)");
-                        String choice2 = input.nextLine();
-                        if (choice2.equalsIgnoreCase("Yes") || choice2.equalsIgnoreCase("Y")) {
-                            inv.setUnlockedSlots(inv.getUnlockedSlots() + 32);
-                            inv.setCoins(inv.getCoins() - 300);
-                            break;
-                        } else if (choice2.equalsIgnoreCase("No") || choice2.equalsIgnoreCase("N")) {
-                            break;
-                        }
-                    }
-
-                }
-                case 6 -> {
                     System.out.println("Thank you for playing!");
                     System.exit(0);
                 }
@@ -144,7 +59,7 @@ public class Menu {
 
             }
         }
-            while (choice != 6) ;
+            while (choice != 4) ;
             input.close();
 
     }
@@ -154,9 +69,7 @@ public class Menu {
         System.out.println("1. Go on an adventure");
         System.out.println("2. Look at your inventory");
         System.out.println("3. Test Connection");
-        System.out.println("4. sell an item");
-        System.out.println("5. buy more space");
-        System.out.println("6. Close the game");
+        System.out.println("4. Close the game");
 
     }
 
@@ -182,7 +95,8 @@ public class Menu {
         System.out.println("5. Back to menu");
     }
 
-    public static void inventoryMenuChoices(Inventory inv, int choice){
+    public static void inventoryMenuChoices(Inventory inv, int choice) throws Exception {
+        dbRepo.loadInventory(inv);
         switch (choice){
             case 1 -> System.out.println(inv.showInventory());
             case 2 -> {
@@ -192,11 +106,102 @@ public class Menu {
                     sortingChoice(inv, choice);
                 }
             }
-            case 3 -> System.out.println("WORKING ON IT!! GET DELETE IN A METHOD");
-            case 4 -> System.out.println("WORKING ON IT!! BUY SLOTS (ALSO IN A METHOD)");
+            case 3 -> {
+                try {
+                    dbRepo.loadInventory(inv);
+                    System.out.println("Current inventory:");
+                    inv.showInventory();
+                    System.out.print("Enter the Id of the item to delete: ");
+                    int deleteID = input.nextInt();
+                    input.nextLine();
+                    Item found = null;
+                    for (Item it : inv.getSlots()) {
+                        if (it.getDbId() == deleteID) {
+                            found = it;
+                            break;
+                        }
+                    }
+                    if (found == null) {
+                        System.out.println("Item with Id " + deleteID + " not found in inventory.");
+                        break;
+                    }
+
+                    if (found instanceof Consumable) {
+                        Consumable c = (Consumable) found;
+                        if (c.getConsumableCount() > 1) {
+                            boolean dbDecremented = false;
+                            try {
+                                dbDecremented = dbRepo.deleteConsumable(c.getDbId());
+                            } catch (Exception e) {
+                                System.out.println("Error decrementing consumable in DB: " + e.getMessage());
+                            }
+                            if (dbDecremented) {
+                                c.setConsumableCount(c.getConsumableCount() - 1);
+                                inv.setTotalWeight(inv.calculateTotalWeight());
+                                System.out.println("Decremented consumable '" + c.getName() + "'. New count: " + c.getConsumableCount());
+                            } else {
+                                System.out.println("Failed to decrement consumable in database.");
+                            }
+                            break;
+                        }
+                    }
+                    boolean dbDeleted = false;
+                    try {
+                        switch (found) {
+                            case Weapon weapon -> dbDeleted = dbRepo.deleteWeapon(deleteID);
+                            case Armor armor -> dbDeleted = dbRepo.deleteArmor(deleteID);
+                            case Consumable consumable -> dbDeleted = dbRepo.deleteConsumable(deleteID);
+                            default -> {
+                            }
+                        }
+                    } catch (Exception e) {
+                        System.out.println("Error deleting item from database: " + e.getMessage());
+                    }
+
+                    if (dbDeleted) {
+                        for (Item it : inv.getSlots()) {
+                            if (it.getDbId() == deleteID) {
+                                int addingCoins = it.getValue();
+                                inv.setCoins(inv.getCoins() + addingCoins);
+                                dbRepo.updateCoins(inv.getCoins());
+                            }
+                        }
+                        inv.removeItemByDbId(deleteID);
+                        System.out.println("Item removed successfully.");
+                    } else {
+                        System.out.println("Failed to remove item from database. Item not removed.");
+                    }
+                } catch (Exception e) {
+                    System.out.println("Error while deleting item: " + e.getMessage());
+                    input.nextLine();
+
+                }
+            }
+
+            case 4 -> {
+                        int price = 300;
+                    try {
+                        coinsCheck(inv.getCoins(), price);
+                        while(inv.addSlotsCheck()){
+                            input.nextLine();
+                            System.out.println("want to buy more space (+ 32 slots)");
+                            System.out.println(" Yes(Y) or No(N)");
+                            String choice2 = input.nextLine();
+                            if (choice2.equalsIgnoreCase("Yes") || choice2.equalsIgnoreCase("Y")) {
+                                dbRepo.updateUnlockedSlots(inv.getUnlockedSlots() + 32);
+                                dbRepo.updateCoins(inv.getCoins() - price);
+                                break;
+                            } else if (choice2.equalsIgnoreCase("No") || choice2.equalsIgnoreCase("N")) {
+                            break;
+                            }
+                        }
+                    } catch (NotEnoughCoinsException e) {
+                        System.out.println(e.getMessage());
+                    }
+
+            }
             case 5 -> {
-                System.out.println("Going back to menu");
-                //Working on it
+                System.out.println("Going back to menu\n");
             }
             default -> System.out.println("Invalid choice.");
         }
@@ -227,8 +232,7 @@ public class Menu {
                 System.out.println(inv.showInventory());
             }
             case 6 -> {
-                System.out.println("Going back to inventory menu");
-                //Working on it
+                System.out.println("Going back to inventory menu\n");
             }
         }
     }
@@ -247,5 +251,14 @@ public class Menu {
         System.out.println("2. Armor first");
         System.out.println("3. Consumable first");
         System.out.print("Your choice: ");
+    }
+
+    public static void coinsCheck(int amount,int price) throws NotEnoughCoinsException {
+        if(amount < price) {
+            throw new NotEnoughCoinsException("Not enough coins.");
+        } else{
+            System.out.println("You have enough coins.\n");
+        }
+
     }
 }

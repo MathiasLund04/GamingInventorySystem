@@ -46,8 +46,13 @@ public class Weapon extends Item {
 
     @Override
     public String toString() {
-        return "Name     |  Weight  |   Value    |  Damage   |   Rarity      |   Weapon Type  \n" +
-                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDamage() + " | " + getRarity() + " | " + getType() + "\n";
+        return String.format(
+                "%-4s | %-12s | %-8s | %-8s | %-8s | %-10s | %-12s%n" +
+                        "%-4d | %-12s | %-8.1f | %-8d | %-8d | %-10s | %-12s%n",
+                "Id", "Name", "Weight", "Value", "Damage", "Rarity", "Weapon Type",
+                getDbId(), getName(), getWeight(), getValue(),
+                getDamage(), getRarity(), getType()
+        );
     }
 
 

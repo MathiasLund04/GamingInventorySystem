@@ -36,16 +36,16 @@ public class DBRepo {
     }
 
 
-    //Test af forbindelse
+    //Test af forbindelse for at sikre at databasen hænger sammen med IntelliJ
     public void testConnection() {
         try (Connection c = db.get()) {
             DatabaseMetaData md = c.getMetaData();
-            System.out.println("✅ Forbindelse OK: " + md.getURL());
+            System.out.println("✅ Connection OK: " + md.getURL());
             System.out.println("    Driver: " + md.getDriverName() + " - " + md.getDriverVersion());
 
         } catch (Exception e) {
-            System.out.println("❌ Forbindelse FEJL: " + e.getMessage());
-            System.out.println("Tip: Tjek URL/USER/PASS og at MySQL kører.");
+            System.out.println("❌ Connection ERROR: " + e.getMessage());
+            System.out.println("Tip: Check URL/USER/PASS and MySQL is running.");
         }
     }
 
@@ -345,7 +345,17 @@ public class DBRepo {
         }
     }
 
-    public void updateWeight(int weight){
+    public void updateUnlockedSlots(int unlockedSlots) throws Exception {
+        String sql = "UPDATE Inventory SET unlockedSlots = ? WHERE inventoryId = 1;";
 
+        try (Connection c = db.get();
+        PreparedStatement ps = c.prepareStatement(sql)){
+            ps.setInt(1,unlockedSlots);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.getCause().printStackTrace();
+        }
     }
+
+
 }

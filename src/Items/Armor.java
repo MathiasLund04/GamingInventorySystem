@@ -37,7 +37,12 @@ public class Armor extends Item {
 
     @Override
     public String toString() {
-        return "Name     |  Weight  |   Value    |  Durability   |   Rarity      |   Placement  \n" +
-                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDurability() + " | " + getRarity() + " | " + getArmorPlacement() + "\n";
+        return String.format(
+                "%-4s | %-12s | %-8s | %-8s | %-12s | %-10s | %-12s%n" +
+                        "%-4d | %-12s | %-8.1f | %-8d | %-12d | %-10s | %-12s%n",
+                "Id", "Name", "Weight", "Value", "Durability", "Rarity", "Placement",
+                getDbId(), getName(), getWeight(), getValue(),
+                getDurability(), getRarity(), getArmorPlacement()
+        );
     }
 }

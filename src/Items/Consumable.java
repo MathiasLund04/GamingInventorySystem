@@ -42,7 +42,13 @@ public class Consumable extends Item {
 
     @Override
     public String toString() {
-        return "Name     |  Weight  |   Value    |  Description   |   Type of Consumable    |   Stack count      \n" +
-                getName() + " | " + getWeight() + " | " + getValue() + " | " + getDescription() + " | " + getConsumableType() + " | " + getConsumableCount() + "/" + Inventory.getMaxStack() + "\n";
+        return String.format(
+                "%-4s | %-12s | %-8s | %-8s | %-20s | %-22s | %-15s%n" +
+                        "%-4d | %-12s | %-8.1f | %-8d | %-20s | %-22s | %-7d/%-7d%n",
+                "Id", "Name", "Weight", "Value", "Description", "Type of Consumable", "Stack count",
+                getDbId(), getName(), getWeight(), getValue(),
+                getDescription(), getConsumableType(),
+                getConsumableCount(), Inventory.getMaxStack()
+        );
     }
 }

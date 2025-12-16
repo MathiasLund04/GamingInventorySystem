@@ -1,5 +1,7 @@
 package Logic.Inventory;
 
+import Exceptions.NotEnoughInventorySpaceException;
+import Exceptions.TooMuchWeightException;
 import Items.Armor;
 import Items.Consumable;
 import Items.Item;
@@ -73,26 +75,27 @@ public class Inventory {
     }
 
     public boolean addItemCheck(Item item) {
-        if (item instanceof Consumable) {
-            Consumable newConsumable = (Consumable) item;
-            for (Item i : slots) {
-                if (i instanceof Consumable) {
-                    Consumable existingConsumable = (Consumable) i;
-                    if (existingConsumable.getName().equals(newConsumable.getName())) {
-                        if (existingConsumable.getConsumableCount() < 5) {
-                            return true;
+            if (item instanceof Consumable) {
+                Consumable newConsumable = (Consumable) item;
+                for (Item i : slots) {
+                    if (i instanceof Consumable) {
+                        Consumable existingConsumable = (Consumable) i;
+                        if (existingConsumable.getName().equals(newConsumable.getName())) {
+                            if (existingConsumable.getConsumableCount() < 5) {
+                                return true;
+                            }
                         }
                     }
                 }
             }
-        }
-            if(slots.size() >= unlockedSlots){
+        if (slots.size() >= unlockedSlots) {
             return false;
-          } else if(getTotalWeight() + item.getWeight() > maxWeight) {
+        } else if (getTotalWeight() + item.getWeight() > maxWeight) {
             return false;
-        } else{
-        return true;
+        } else {
+            return true;
         }
+
     }
     public String addItem(Item item) {
        String msg = " ";
@@ -136,6 +139,7 @@ public class Inventory {
         msg.append("\nCoins: " + getCoins() + "\nTotal Weight: " + getTotalWeight() + "\nUnlocked Slots: " + getUnlockedSlots() + "\n");
 
         for (Item item : slots){
+            msg.append("------\n");
             msg.append(item).append("\n");
 
             if (slots.isEmpty()){
@@ -143,6 +147,8 @@ public class Inventory {
             }
 
         }
+        
+        msg.append("------------------------");
         return msg;
 
 
@@ -166,7 +172,7 @@ public class Inventory {
     }
 
 
-
+//Sortering
     public void bubbleSortById(){
         int size = slots.size();
         for (int i = 0; i < size; i++){
@@ -272,7 +278,7 @@ public class Inventory {
 
 
     public boolean addSlotsCheck(){
-        if (coins>300){
+        if (coins>300 && unlockedSlots < maxSlots){
             return true;
         } else{
             return false;
