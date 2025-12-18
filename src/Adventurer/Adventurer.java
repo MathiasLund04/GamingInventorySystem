@@ -12,10 +12,10 @@ import Logic.GameLogic;
 import Logic.Inventory.Inventory;
 
 public class Adventurer {
-    private DBConnection db;
-    private DBRepo dbRepo;
-    private Inventory inv;
-    private GameLogic gl;
+    private final DBConnection db;
+    private final DBRepo dbRepo;
+    private final Inventory inv;
+    private final GameLogic gl;
 
 
     public Adventurer(Inventory inventory, DBRepo dbRepo) {
@@ -30,9 +30,9 @@ public class Adventurer {
         inv.setCoins(inv.getCoins() + addedCoins);
         dbRepo.updateCoins(inv.getCoins());
         if (addedCoins == 1){
-            msg.append("\nYou found " + addedCoins + " coin on your adventure! \n");
+            msg.append("\nYou found ").append(addedCoins).append(" coin on your adventure! \n");
         } else {
-            msg.append("\nYou found " + addedCoins + " coins on your adventure! \n");;
+            msg.append("\nYou found ").append(addedCoins).append(" coins on your adventure! \n");
         }
 
 
@@ -52,7 +52,7 @@ public class Adventurer {
                         if (existing.getName().equals(item.getName())) {
                             if (existing.getConsumableCount() < inv.getMaxStack()) {
                                 try {
-                                    int hasId = dbRepo.insertConsumable(1, gen.templateId);
+                                    int hasId = dbRepo.insertConsumable(1, gen.templateId,inv);
                                     if (hasId > 0) {
                                         existing.setDbId(hasId);
                                     }
@@ -71,7 +71,7 @@ public class Adventurer {
                     msg.append("\nNot enough Room or carry capacity to add this item.\n");
                     return msg;
                 }
-                newId = dbRepo.insertConsumable(1, gen.templateId);
+                newId = dbRepo.insertConsumable(1, gen.templateId,inv);
                 if (newId > 0) {
                     item.setDbId(newId);
                 }

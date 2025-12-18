@@ -14,12 +14,9 @@ import java.sql.*;
 
 public class DBRepo {
     private final DBConnection db;
-    private Inventory inv;
     public DBRepo(DBConnection db) {
         this.db = db;
     }
-    private GameLogic gl;
-
 
     public static class GeneratedItem {
         public final Item item;
@@ -135,8 +132,6 @@ public class DBRepo {
                     c.setConsumableCount(rs.getInt("quantity"));
                     gameLogic.addItem(c);
                 }
-
-
             }
         } catch (SQLException e) {
             e.printStackTrace(); //Exception for at se at forbindelsen virker og at det er skrevet ordentligt ind i koden
@@ -164,7 +159,6 @@ public class DBRepo {
                         WeaponHandleType handleType = WeaponHandleType.valueOf(rs.getString("handletype"));
                         Weapon w = new Weapon(name, weaponType, rarity, weight, valuee, damage, handleType);
                         return new GeneratedItem(w,weaponID,"weapon");
-
                         }
                     break;
 
@@ -222,7 +216,7 @@ public class DBRepo {
         }
         return -1;
     }
-    public int insertConsumable(int invId, int consumableId) throws Exception {
+    public int insertConsumable(int invId, int consumableId, Inventory inv) throws Exception {
         try(Connection c = db.get()) {
         String updateSql = "UPDATE Hasitem SET quantity = quantity + 1 WHERE inventoryId = ? AND consumableId = ? AND quantity >= 1 AND quantity <?";
             try (PreparedStatement ps = c.prepareStatement(updateSql)) {
