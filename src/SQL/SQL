@@ -1,0 +1,60 @@
+CREATE DATABASE Locc
+USE Locc
+
+CREATE TABLE Weapon (
+weaponId INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(30) NOT NULL,
+weaponType ENUM('SWORD', 'LONGSWORD', 'AXE', 'WARHAMMER', 'BOW', 'SHIELD') NOT NULL,
+rarity ENUM('COMMON', 'UNCOMMON', 'RARE', 'EPIC') NOT NULL,
+weight DECIMAL(3,1) NOT NULL,
+valuee INT NOT NULL,
+damage INT NOT NULL,
+handleType ENUM('ONEHANDED', 'TWOHANDED', 'OFFHAND') NOT NULL
+);
+
+CREATE TABLE Consumable (
+consumableId INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(30) NOT NULL,
+weight DECIMAL(3,1) NOT NULL,
+valuee INT NOT NULL,
+description VARCHAR(60) NOT NULL,
+consumableType ENUM('HEALTHPOTION', 'STRENGTHPOTION', 'STEALTHPOTION', 'ARROW') NOT NULL
+);
+
+CREATE TABLE Armor (
+armorId INT PRIMARY KEY AUTO_INCREMENT,
+name VARCHAR(30) NOT NULL,
+rarity ENUM('COMMON', 'UNCOMMON', 'RARE', 'EPIC') NOT NULL,
+weight DECIMAL(3,1) NOT NULL,
+valuee INT NOT NULL,
+durability INT NOT NULL,
+armorPlacement ENUM('HELMET', 'BREASTPLATE', 'LEGGINGS', 'BOOTS', 'GLOVES') NOT NULL
+);
+
+CREATE TABLE hasItem (
+id INT PRIMARY KEY AUTO_INCREMENT,
+inventoryId INT NOT NULL,
+armorId INT,
+weaponId INT,
+consumableId INT,
+quantity INT NOT NULL default 1,
+FOREIGN KEY (inventoryId) REFERENCES Inventory(inventoryId),
+FOREIGN KEY (weaponId) REFERENCES Weapon(weaponId),
+FOREIGN KEY (consumableId) REFERENCES Consumable(consumableId),
+FOREIGN KEY (armorId) REFERENCES Armor(armorId)
+);
+
+CREATE TABLE Inventory (
+inventoryId INT PRIMARY KEY AUTO_INCREMENT,
+coins INT NOT NULL,
+totalWeight INT NOT NULL,
+unlockedSlots INT NOT NULL
+);
+
+Insert into Armor( name, rarity, weight, valuee, durability, armorPlacement)
+values ('Iron Helmet','UNCOMMON',0.3,20,100,'HELMET'),('Iron brestplate', 'UNCOMMON',0.7,30,100,'BREASTPLATE' ),('Iron Leggings','UNCOMMON',0.6,20,100,'LEGGINGS'),('Iron Boots','UNCOMMON', 0.2,15,100,'BOOTS'), ('Leather Gloves','COMMON',0.1,10,100,'GLOVES'), ('Obsidian Helmet','RARE', 0.3, 60,250,'HELMET'), ('Obsidian Breastplate','RARE', 0.7, 90,250,'BREASTPLATE'), ('Obsidian Leggings','RARE',0.6,60,250,'LEGGINGS'), ('Obsidian Boots','RARE',0.2,45,250,'BOOTS'), ('Nemisis Crown',"EPIC", 0.3 , 200, 750 , 'HELMET');
+Insert into Weapon(name, weaponType, rarity, weight, valuee, damage, handleType)
+values('Iron Sword','SWORD','COMMON', 1.5, 10 , 5 ,'ONEHANDED'), ('Steel Longsword','LONGSWORD','UNCOMMON', 2.0 , 20 , 7 ,'TWOHANDED'), ('Longbow','BOW','COMMON', 1.0 , 15, 4,'TWOHANDED'), ('WarHammer','WARHAMMER','RARE',2.5 ,35 ,10 ,'TWOHANDED'), ('Hand Axe','AXE','UNCOMMON',0.5, 7 , 3 ,'ONEHANDED'), ('Shield','SHIELD','UNCOMMON', 1.0 , 7 , 1 ,'OFFHAND');
+Insert into Consumable(name, weight, valuee, description, consumableType)
+values('Health Potion',0.1,20,'Heals 50 HP','HEALTHPOTION'),('Strength-Potion',0.1,20,'Deals +50% DMG','STRENGTHPOTION'),('Stealth-Potion',0.1,25,'Insible for 30%','STEALTHPOTION'),('Arrow',0.1,1,'Normal Arrow','ARROW')
+
