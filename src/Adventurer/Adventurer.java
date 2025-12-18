@@ -22,6 +22,7 @@ public class Adventurer {
         this.db = new DBConnection();
         this.dbRepo = dbRepo != null ? dbRepo : new DBRepo(db);
         this.inv = inventory != null ? inventory : new Inventory(0,32,0);
+        this.gl = new GameLogic(inv);
     }
     public StringBuilder goOnAdventure() throws Exception {
         StringBuilder msg = new StringBuilder();

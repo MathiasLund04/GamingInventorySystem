@@ -18,6 +18,8 @@ public class DBRepo {
     public DBRepo(DBConnection db) {
         this.db = db;
     }
+    private GameLogic gl;
+
 
     public static class GeneratedItem {
         public final Item item;

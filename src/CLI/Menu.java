@@ -39,7 +39,7 @@ public class Menu {
                         while (choice != 5){
                             inventoryMenu();
                             choice = getChoice(input);
-                            inventoryMenuChoices(inv, choice);
+                            inventoryMenuChoices(inv, choice, gl);
                         }
                     } else {
                         System.out.println("no inventory loaded");
@@ -107,7 +107,7 @@ public class Menu {
         System.out.println("5. Back to menu");
     }
 
-    public static void inventoryMenuChoices(Inventory inv, int choice) throws Exception {
+    public static void inventoryMenuChoices(Inventory inv, int choice, GameLogic gl) throws Exception {
         dbRepo.loadInventory(inv,gl);
         switch (choice){
             case 1 -> System.out.println(gl.showInventory());
@@ -122,11 +122,14 @@ public class Menu {
                 try {
                     dbRepo.loadInventory(inv,gl);
                     System.out.println("Current inventory:");
-                    gl.showInventory();
-                    System.out.print("Enter the Id of the item to delete: ");
+                    System.out.println(gl.showInventory());
+                    System.out.print("Enter the Id of the item to delete(0 to go back to menu): ");
                     int deleteID = input.nextInt();
                     input.nextLine();
                     Item found = null;
+                    if (deleteID == 0) {
+                        break;
+                    }
                     for (Item it : inv.getSlots()) {
                         if (it.getDbId() == deleteID) {
                             found = it;
@@ -137,7 +140,6 @@ public class Menu {
                         System.out.println("Item with Id " + deleteID + " not found in inventory.");
                         break;
                     }
-
                     if (found instanceof Consumable) {
                         Consumable c = (Consumable) found;
                         if (c.getConsumableCount() > 1) {
@@ -222,7 +224,7 @@ public class Menu {
     public static void sortingChoice(GameLogic gl, int choice){
         switch (choice){
             case 1 -> {
-                Menu.gl.bubbleSortById();
+                Menu.gl.bubbleSortByOldest();
                 System.out.println(gl.showInventory());
             }
             case 2 -> {

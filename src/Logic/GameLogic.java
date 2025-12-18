@@ -8,7 +8,6 @@ import Items.Item;
 import Items.Weapon;
 import Logic.Inventory.Inventory;
 import java.util.Iterator;
-import java.util.Random;
 
 public class GameLogic {
  private Inventory inv;
@@ -151,12 +150,12 @@ public class GameLogic {
   return null;
  }
  //Sortering
- public void bubbleSortById(){
+ public void bubbleSortByOldest(){
   int size = inv.getSlots().size();
   for (int i = 0; i < size; i++){
    boolean swapped = false;
-
-   for (int j = 0; j < size - 1; j++){
+   
+   for (int j = 0; j < size - i - 1; j++){
     if (inv.getSlots().get(j).getDbId() > inv.getSlots().get(j+1 ).getDbId()){
      Item temp = inv.getSlots().get(j);
      inv.getSlots().set(j, inv.getSlots().get(j+1));
@@ -174,7 +173,7 @@ public class GameLogic {
   int size = inv.getSlots().size();
   for (int i = 0; i < size; i++){
    boolean swapped = false;
-   for (int j = 0; j < size - 1; j++){
+   for (int j = 0; j < size - i - 1; j++){
     if (inv.getSlots().get(j).getDbId() < inv.getSlots().get(j+1).getDbId()){
      Item temp = inv.getSlots().get(j);
      inv.getSlots().set(j, inv.getSlots().get(j+1));
@@ -193,7 +192,7 @@ public class GameLogic {
   for (int i = 0; i < size; i++){
    boolean swapped = false;
 
-   for (int j = 0; j < size - 1; j++){
+   for (int j = 0; j < size - i - 1; j++){
     if (inv.getSlots().get(j).getValue() > inv.getSlots().get(j+1).getValue()){
      Item temp = inv.getSlots().get(j);
      inv.getSlots().set(j, inv.getSlots().get(j+1));
@@ -211,8 +210,8 @@ public class GameLogic {
   int size = inv.getSlots().size();
   for (int i = 0; i < size; i++){
    boolean swapped = false;
-   for (int j = 0; j < size - 1; j++){
-    if (inv.getSlots().get(j).getWeight() > inv.getSlots().get(j+1).getWeight()){
+   for (int j = 0; j < size - i - 1; j++){
+    if (inv.getSlots().get(j).getWeight() < inv.getSlots().get(j+1).getWeight()){
      Item temp = inv.getSlots().get(j);
      inv.getSlots().set(j, inv.getSlots().get(j+1));
      inv.getSlots().set(j + 1, temp);
@@ -229,7 +228,7 @@ public class GameLogic {
   int size = inv.getSlots().size();
   for (int i = 0; i < size; i++){
    boolean swapped = false;
-   for (int j = 0; j < size - 1; j++){
+   for (int j = 0; j < size - i - 1; j++){
     int p1 = getTypePriority(inv.getSlots().get(j), typePriority);
     int p2 = getTypePriority(inv.getSlots().get(j+1), typePriority);
 
